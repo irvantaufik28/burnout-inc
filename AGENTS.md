@@ -1,10 +1,10 @@
 # Burnout Inc. | Project Source of Truth
 
 ## Project Overview
-Burnout Inc. is an indie management simulation game inspired by startup and AI tycoon games. The gameplay focuses on resource management (energy, focus, mood, money) while building a digital product and growing technical expertise.
+Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a struggling indie developer navigating the high-pressure world of gig work, deadlines, and professional reputation.
 
 - Location: /Volumes/Development/burnout-inc
-- Vision: Minimalist, high-performance dashboard aesthetic (Indie Hacker / SaaS style).
+- Vision: High-stakes, minimalist dashboard sim focusing on the emotional and strategic survival of a freelancer.
 
 ---
 
@@ -17,22 +17,22 @@ Burnout Inc. is an indie management simulation game inspired by startup and AI t
 ---
 
 ## Mandatory Development Workflow
-1. **Docs First:** Always read AGENTS.md and /docs before implementing new features.
-2. **Document Every System:** No major system exists without a dedicated .md file in /docs explaining its identity, effects, and growth logic.
-3. **Update Progress:** Keep the Progress Log below updated for every change.
-4. **Consistency:** Ensure new logic respects existing synergy, temporal, and economic formulas.
+1. Docs First: Always read AGENTS.md and /docs before implementing new features.
+2. Document Every System: No major system exists without a dedicated .md file in /docs.
+3. Localization Rule: Every gameplay system and UI text MUST support English and Indonesian from the start.
+   - Files: src/locales/en.js and src/locales/id.js.
+   - Technical terms (Frontend, Backend, AI, etc.) remain in English.
+4. Update Progress: Keep the Progress Log below updated for every change.
 
 ---
 
-## Folder Structure
-src/
- - components/    # Reusable UI panels
- - store/         # Zustand store (useGameStore.js)
- - systems/       # Automated logic
- - data/          # Static definitions (productData.js)
- - hooks/         # React hooks (useGameLoop.js)
- - styles/        # CSS (index.css)
- - App.jsx        # Orchestrator
+## Architecture Decisions
+1. Zustand for Global State: Central store for all game data. logic is kept in actions to keep components "dumb".
+2. Modular Dashboard: UI is split into specialized panels to keep files small and readable.
+3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
+4. Task System: All major actions (Working on Contract, Resting) consume game hours and advance deadlines.
+5. Interview System: Situational mini-game focused on personality/vibe matching.
+6. Client Archetypes: MEMORABLE personalities that affect contract difficulty and feedback.
 
 ---
 
@@ -43,25 +43,21 @@ src/
 - Implement basic dashboard layout.
 - Initial Zustand store.
 
-### Phase 2: Core Loops (Completed)
-- Implement Task Duration System. [docs/task-system.md]
-- Implement Focus and Mood mechanics. [docs/skills/README.md]
-- Implement Game Speed Control.
-- Implement Day Cycle (Expenses & Recovery). [docs/day-cycle.md]
-- Implement Losing Conditions.
-- Implement Product Creation & Launch lifecycle. [docs/product-system.md]
-- Implement Tech Stack Familiarity System. [docs/skills/README.md]
-- Implement Freelance Gated Contracts. [docs/freelance-system.md]
-
-### Phase 3: Expansion (Current)
-- [ ] Implement Market Trend System.
-- [ ] Implement AI Agent Automation.
-- [ ] Implement Burnout Crisis events.
+### Phase 2: Freelance Survival Loop (Current)
+- [x] Update Core Documentation (AGENT.md, docs/).
+- [x] Implement Localization System (Bilingual: EN/ID).
+- [x] Refine Freelance Board System (Randomized varied contracts).
+- [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
+- [x] Implement Interview System (Situational personality-driven).
+- [ ] Implement Client Archetypes & Feedback.
+- [ ] Implement Contract Chaos Events.
+- [ ] Implement Portfolio System.
+- [ ] Implement Recurring Clients.
 
 ---
 
 ## Agent Guidelines
-1. Keep it Simple: No complex class structures or deep abstractions.
-2. Fast Iteration: Prioritize functional prototypes over polished visuals.
-3. Dark Mode Always: Background zinc-950, borders zinc-800.
-4. Abstraction first: Favor broad categories (e.g. 'Backend') over specifics (e.g. 'PostgreSQL').
+1. Simple First: Avoid enterprise patterns. Focus on addictive loops.
+2. Docs Mandatory: Update /docs before every major system change.
+3. Dark Minimalist UI: Background zinc-950, borders zinc-800.
+4. Mixed-Language Culture: Translate UI and narrative, keep Tech terms in English.

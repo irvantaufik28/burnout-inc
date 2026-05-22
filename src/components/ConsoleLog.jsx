@@ -1,12 +1,5 @@
-import React from 'react';
 import { useGameStore } from '../store/useGameStore';
 
-/**
- * ConsoleLog Component
- * 
- * Renders the event logs in a scrollable container.
- * Styled to look like a terminal/command console.
- */
 export const ConsoleLog = () => {
   const logs = useGameStore((state) => state.logs);
 

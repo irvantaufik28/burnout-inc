@@ -1,53 +1,74 @@
-import React from 'react';
 import { useGameStore } from '../store/useGameStore';
+
+const StatBar = ({ label, value, color }) => (
+  <div>
+    <div className="flex justify-between text-[10px] mb-1 uppercase tracking-wider text-zinc-500 font-bold">
+      <span>{label}</span>
+      <span>{Math.round(value) + "%"}</span>
+    </div>
+    <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+      <div 
+        className={"h-full transition-all duration-1000 " + color} 
+        style={{ width: value + "%" }}
+      ></div>
+    </div>
+  </div>
+);
 
 export const StatsPanel = () => {
   const player = useGameStore((state) => state.player);
-  const products = useGameStore((state) => state.products);
   const techStack = useGameStore((state) => state.techStack);
+  const portfolio = useGameStore((state) => state.portfolio);
+  const t = useGameStore((state) => state.t);
 
-  const StatBar = ({ label, value, color }) => (
-    <div>
-      <div className="flex justify-between text-[10px] mb-1 uppercase tracking-wider text-zinc-500">
-        <span>{label}</span>
-        <span>{Math.round(value) + "%"}</span>
-      </div>
-      <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-        <div 
-          className={"h-full transition-all duration-1000 " + color} 
-          style={{ width: value + "%" }}
-        ></div>
-      </div>
-    </div>
-  );
+  const getRepTier = (rep) => {
+    if (rep >= 80) return 'Legendary Indie Hacker';
+    if (rep >= 60) return 'Top Rated Expert';
+    if (rep >= 40) return 'Reliable Freelancer';
+    if (rep >= 20) return 'Junior Developer';
+    return 'Unknown Freelancer';
+  };
 
   return (
     <div className="space-y-6">
-      {/* Founder Status */}
+      {/* Freelancer Status */}
       <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl">
-        <h2 className="text-zinc-500 text-xs font-bold uppercase mb-4 tracking-wider">Founder Status</h2>
-        <div className="space-y-4">
-          <StatBar label="Energy" value={player.energy} color="bg-blue-500" />
-          <StatBar label="Focus" value={player.focus} color="bg-purple-500" />
-          
-          <div className="pt-2">
-            <p className="text-[10px] uppercase text-zinc-500 tracking-widest font-bold">Total Capital</p>
-            <span className={"text-2xl font-mono font-bold " + (player.money < 0 ? "text-red-500" : "text-emerald-400")}>
-              {"$" + Math.floor(player.money).toLocaleString()}
+        <div className="flex justify-between items-start mb-6">
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-wider">{t('dashboard.status')}</h2>
+          <div className="text-right">
+            <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-full font-bold uppercase tracking-tighter">
+              {getRepTier(player.reputation)}
             </span>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <StatBar label={t('common.energy')} value={player.energy} color="bg-blue-500" />
+          <StatBar label={t('common.focus')} value={player.focus} color="bg-purple-500" />
+          
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800/50">
+            <div>
+              <p className="text-[10px] uppercase text-zinc-600 tracking-widest font-black">{t('common.capital')}</p>
+              <span className={"text-xl font-mono font-bold " + (player.money < 0 ? "text-red-500" : "text-emerald-400")}>
+                {"$" + Math.floor(player.money).toLocaleString()}
+              </span>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase text-zinc-600 tracking-widest font-black text-right">{t('common.reputation')}</p>
+              <span className="text-xl font-mono font-bold text-zinc-100">{player.reputation}</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Tech Familiarity */}
+      {/* Tech Stack */}
       <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl">
-        <h2 className="text-zinc-500 text-xs font-bold uppercase mb-4 tracking-wider">Tech Familiarity</h2>
+        <h2 className="text-zinc-500 text-xs font-bold uppercase mb-4 tracking-wider">{t('dashboard.techStack')}</h2>
         <div className="grid grid-cols-1 gap-3">
-          {Object.entries(techStack).map(([tech, level]) => (
+          {Object.entries(techStack || {}).map(([tech, level]) => (
             <div key={tech} className="space-y-1">
               <div className="flex justify-between text-[9px] uppercase tracking-widest text-zinc-500">
-                <span>{tech}</span>
-                <span className="text-zinc-300 font-mono">{"LV " + Math.floor(level)}</span>
+                <span className="font-bold">{tech}</span>
+                <span className="text-zinc-400 font-mono">{"LV " + Math.floor(level)}</span>
               </div>
               <div className="h-0.5 w-full bg-zinc-800 rounded-full overflow-hidden">
                 <div 
@@ -60,20 +81,19 @@ export const StatsPanel = () => {
         </div>
       </section>
 
-      {/* Portfolio */}
+      {/* Portfolio History */}
       <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl">
-        <h2 className="text-zinc-500 text-xs font-bold uppercase mb-4 tracking-wider">Portfolio</h2>
-        <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 scrollbar-hide">
-          {products.length === 0 && <p className="text-zinc-700 text-[10px] uppercase text-center italic">No active products</p>}
-          {products.map((p, i) => (
-            <div key={i} className="border-b border-zinc-800 pb-3 last:border-0">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-bold text-zinc-200 text-sm truncate max-w-[120px]">{p.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">{"$" + p.stats.revenue}</span>
+        <h2 className="text-zinc-500 text-xs font-bold uppercase mb-4 tracking-wider">{t('dashboard.portfolio')}</h2>
+        <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 scrollbar-hide">
+          {portfolio.length === 0 && <p className="text-zinc-700 text-[10px] uppercase text-center italic mt-4">{t('dashboard.resumeEmpty')}</p>}
+          {portfolio.map((p, i) => (
+            <div key={i} className="flex justify-between items-center border-b border-zinc-800 pb-2 last:border-0">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-zinc-200 truncate">{p.title}</p>
+                <p className="text-[9px] text-zinc-500 uppercase">{p.client}</p>
               </div>
-              <div className="flex justify-between text-[9px] text-zinc-600 uppercase tracking-widest">
-                <span>{p.stats.users + " Users"}</span>
-                <span>{p.launchResult}</span>
+              <div className={"text-[10px] font-bold " + (p.result === 'success' ? "text-emerald-500" : "text-red-500")}>
+                {p.result === 'success' ? "PAID" : "FAILED"}
               </div>
             </div>
           ))}

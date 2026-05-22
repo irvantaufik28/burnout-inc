@@ -1,15 +1,17 @@
 import { create } from 'zustand'
-import { calculateSynergy, getReviewTemplate } from '../data/productData'
+import { en } from '../locales/en'
+import { id } from '../locales/id'
+
+const locales = { en, id }
 
 const INITIAL_STATE = {
   player: {
-    money: 1000,
+    money: 500,
     energy: 100,
     mood: 100,
     focus: 100,
-    reputation: 0,
-    specialization: 'Generalist', // Default
-    skills: { coding: 1, design: 1, marketing: 1 }
+    reputation: 10,
+    specialization: 'Generalist'
   },
   techStack: {
     frontend: 0,
@@ -19,17 +21,31 @@ const INITIAL_STATE = {
     mobile: 0,
   },
   gameTime: { day: 1, hour: 8, isPaused: false, speed: 1 },
-  activeProduct: null, 
-  products: [], 
-  currentTask: null, 
-  logs: ['System Boot: Welcome to Burnout Inc.'],
+  language: 'en',
+  
+  availableContracts: [],
+  activeContract: null, 
+  pendingApplication: null, 
+  portfolio: [], 
+  
+  logs: ['System Boot: Freelancer Survival Mode Active.'],
   isGameOver: false,
   gameOverReason: '',
-  isCreatingProduct: false
 }
 
 export const useGameStore = create((set, get) => ({
   ...INITIAL_STATE,
+
+  setLanguage: (lang) => set({ language: lang }),
+  t: (path) => {
+    const keys = path.split('.')
+    let result = locales[get().language]
+    for (const key of keys) {
+      if (!result || result[key] === undefined) return path
+      result = result[key]
+    }
+    return result
+  },
 
   addLog: (message) => set((state) => ({
     logs: [message, ...state.logs].slice(0, 50)
@@ -43,11 +59,8 @@ export const useGameStore = create((set, get) => ({
     gameTime: { ...state.gameTime, isPaused: !state.gameTime.isPaused }
   })),
 
-  toggleCreateModal: (val) => set({ isCreatingProduct: val }),
-
   restartGame: () => set(INITIAL_STATE),
 
-  // --- CORE LOOP TICK ---
   tickTime: () => {
     const state = get()
     if (state.isGameOver) return
@@ -61,6 +74,24 @@ export const useGameStore = create((set, get) => ({
       state.handleNewDay()
     }
 
+    if (state.activeContract) {
+      const remaining = state.activeContract.remaining - 1
+      if (remaining <= 0 && state.activeContract.progress < 100) {
+        state.handleContractFailure('Deadline missed.')
+      } else {
+        set((s) => ({ activeContract: { ...s.activeContract, remaining } }))
+      }
+    }
+
+    if (state.pendingApplication && state.pendingApplication.status === 'waiting') {
+      const delay = state.pendingApplication.delay - 1
+      if (delay <= 0) {
+        state.resolveContractApplication()
+      } else {
+        set((s) => ({ pendingApplication: { ...s.pendingApplication, delay } }))
+      }
+    }
+
     set((state) => ({
       gameTime: { ...state.gameTime, hour, day }
     }))
@@ -71,119 +102,94 @@ export const useGameStore = create((set, get) => ({
 
   handleNewDay: () => {
     const state = get()
-    const baseExpenses = 50 
+    const expenses = 40 
     
-    // DevOps familiarity reduces expenses (up to 50% reduction)
-    const expenseReduction = Math.min(25, state.techStack.devops / 4)
-    const finalExpenses = baseExpenses - expenseReduction
-
-    let dailyRevenue = 0
-    state.products.forEach(p => {
-      dailyRevenue += p.stats.revenue
-    })
-
     set((state) => ({
       player: {
         ...state.player,
-        money: state.player.money - finalExpenses + dailyRevenue,
-        energy: Math.min(100, state.player.energy + 20),
-        mood: Math.max(0, state.player.mood - 2)
+        money: state.player.money - expenses,
+        energy: Math.min(100, state.player.energy + 25),
       }
     }))
 
-    state.addLog('Daily Report: Revenue +$' + Math.floor(dailyRevenue) + ' | Expenses -$' + Math.floor(finalExpenses));
-
-    if (Math.random() < 0.1) state.triggerRandomEvent()
+    state.addLog('Daily Expenses: -$' + expenses + '. Survival cost applied.');
+    state.refreshContractBoard()
   },
 
-  triggerRandomEvent: () => {
-    const events = [
-      { msg: 'Laptop overheating. Focus dropped.', effect: { focus: -15 } },
-      { msg: 'Tech Twitter found your app! Users +50', effect: { users: 50 }, target: 'portfolio' },
-      { msg: 'AWS outage. Quality dropped.', effect: { quality: -2 }, target: 'portfolio' }
-    ]
-    const event = events[Math.floor(Math.random() * events.length)]
-    
-    set((state) => {
-      const newPlayer = { ...state.player }
-      if (event.effect.focus) newPlayer.focus = Math.max(0, newPlayer.focus + event.effect.focus)
-      if (event.effect.money) newPlayer.money += event.effect.money
+  refreshContractBoard: () => {
+    const archetypes = [
+      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend' },
+      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend' },
+      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai' }
+    ];
 
-      if (event.target === 'portfolio' && state.products.length > 0) {
-        const index = Math.floor(Math.random() * state.products.length)
-        const products = [...state.products]
-        const p = { ...products[index], stats: { ...products[index].stats } }
-        if (event.effect.users) p.stats.users += event.effect.users
-        if (event.effect.quality) p.stats.quality += event.effect.quality
-        products[index] = p
-        return { player: newPlayer, products }
+    const generateContract = (archetype, index) => {
+      const reward = Math.floor(Math.random() * (archetype.rewardRange[1] - archetype.rewardRange[0])) + archetype.rewardRange[0];
+      const deadline = Math.floor(Math.random() * (archetype.deadlineRange[1] - archetype.deadlineRange[0])) + archetype.deadlineRange[0];
+      const client = archetype.clients[Math.floor(Math.random() * archetype.clients.length)];
+      return {
+        id: 'c-' + Date.now() + '-' + index,
+        title: archetype.tier + ' ' + (archetype.tech === 'ai' ? 'ML Model' : archetype.tech === 'backend' ? 'API' : 'UI'),
+        difficulty: archetype.tier,
+        reward,
+        deadline,
+        remaining: deadline,
+        client,
+        req: { [archetype.tech]: archetype.tier === 'Easy' ? 0 : archetype.tier === 'Medium' ? 10 : 25 }
       }
-      
-      return { player: newPlayer }
-    })
-    get().addLog('EVENT: ' + event.msg)
-  },
-
-  // --- PRODUCT MANAGEMENT ---
-  createProduct: (blueprint) => {
-    const product = {
-      ...blueprint,
-      released: false,
-      stats: { progress: 0, quality: 0, bugs: 0, hype: 0, users: 0, revenue: 0 }
     }
-    set({ activeProduct: product, isCreatingProduct: false })
-    get().addLog('Initialized Blueprint: ' + blueprint.name)
+
+    const newContracts = archetypes.map((a, i) => generateContract(a, i));
+    set({ availableContracts: newContracts })
   },
 
-  launchProduct: () => {
+  applyForContract: (contract) => {
     const state = get()
-    const p = state.activeProduct
-    if (!p || p.stats.progress < 100) return
-
-    const synergy = calculateSynergy(p.type, p.market, p.focus)
+    if (state.activeContract || state.pendingApplication) return
     
-    // Tech familiarity bonuses
-    let techBonus = 0
-    if (p.type === 'AI Tool') techBonus += state.techStack.ai / 5
-    if (p.type === 'Consumer App') techBonus += state.techStack.mobile / 5
-    if (p.type === 'Developer Tool') techBonus += state.techStack.backend / 5
-
-    const score = p.stats.quality + synergy + techBonus - (p.stats.bugs * 2)
-    
-    let result = 'Decent'
-    let initialUsers = 10
-    if (score >= 90) { result = 'Viral Hit'; initialUsers = 500; }
-    else if (score >= 70) { result = 'Success'; initialUsers = 100; }
-    else if (score < 40) { result = 'Disaster'; initialUsers = 5; }
-
-    // Backend familiarity boosts revenue multiplier
-    const revMultiplier = 0.5 + (state.techStack.backend / 200)
-    const revenue = Math.floor(initialUsers * revMultiplier)
-    const review = getReviewTemplate(score, p.stats.bugs)
-
-    const launchedProduct = {
-      ...p,
-      released: true,
-      launchResult: result,
-      stats: { ...p.stats, users: initialUsers, revenue }
-    }
-
-    set((state) => ({
-      products: [launchedProduct, ...state.products],
-      activeProduct: null,
-      // DevOps boost upon launch
-      techStack: { ...state.techStack, devops: state.techStack.devops + 5 }
-    }))
-
-    state.addLog('LAUNCH: ' + p.name + ' was a ' + result + '! Users: ' + initialUsers);
-    state.addLog('REVIEWS: ' + review);
+    set({ 
+      pendingApplication: { 
+        contract, 
+        status: 'waiting', 
+        delay: Math.floor(Math.random() * 3) + 2 
+      } 
+    })
+    state.addLog('Application Sent: Waiting for ' + contract.client + ' to respond...');
   },
 
-  // --- TASK LOGIC ---
+  resolveContractApplication: () => {
+    const state = get()
+    const { contract } = state.pendingApplication
+    set({ pendingApplication: { ...state.pendingApplication, status: 'interview' } })
+    state.addLog('Update: ' + contract.client + ' requested an interview.');
+  },
+
+  acceptContract: (contract) => {
+    set({ 
+      activeContract: { ...contract, progress: 0 }, 
+      pendingApplication: null 
+    })
+    get().addLog('Contract Approved: ' + contract.title + ' is now active.');
+  },
+
+  rejectPending: () => set({ pendingApplication: null }),
+
+  handleContractFailure: (reason) => {
+    const state = get()
+    const contract = state.activeContract
+    set((s) => ({
+      player: { ...s.player, reputation: Math.max(0, s.player.reputation - 15), mood: Math.max(0, s.player.mood - 10) },
+      portfolio: [...s.portfolio, { ...contract, result: 'fail' }],
+      activeContract: null,
+      currentTask: null
+    }))
+    state.addLog('CRITICAL FAILURE: ' + contract.title + '. ' + reason + ' Reputation decreased.');
+  },
+
   startTask: (task) => {
     const state = get()
     if (state.currentTask) return
-    if (state.player.energy < task.energyCost) {
+    if (state.player.energy < (task.energyCost || 0)) {
       state.addLog('Critical: Insufficient Energy.');
       return
     }
@@ -209,67 +215,45 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     const efficiency = state.player.focus / 100
     
-    // Tech familiarity growth and speed bonuses
-    let speedBonus = 1
-    const techGrowth = { ...state.techStack }
-
-    if (task.type === 'build' && state.activeProduct) {
-      const p = state.activeProduct
-      if (p.type === 'AI Tool') {
-        techGrowth.ai += 1
-        speedBonus += state.techStack.ai / 100
-      }
-      if (p.type === 'Productivity App') techGrowth.frontend += 1
-      if (p.type === 'Developer Tool') techGrowth.backend += 1
-      if (p.type === 'Consumer App') techGrowth.mobile += 1
-    }
-
-    if (task.type === 'freelance') {
-      if (task.name.includes('Frontend')) techGrowth.frontend += 2
-      if (task.name.includes('API')) techGrowth.backend += 2
-    }
-
     set((state) => {
       const newPlayer = { 
         ...state.player, 
-        energy: Math.max(0, state.player.energy - task.energyCost),
+        energy: Math.max(0, state.player.energy - (task.energyCost || 0)),
         focus: Math.max(0, state.player.focus - 5)
       }
-      let activeProduct = state.activeProduct
-
-      if (task.type === 'freelance') {
-        newPlayer.money += task.reward * efficiency
-      }
-      if (task.type === 'build' && activeProduct) {
-        // Backend reduces bug chance
-        const bugChance = Math.max(0, 40 - state.techStack.backend)
-        activeProduct = {
-          ...activeProduct,
-          stats: {
-            ...activeProduct.stats,
-            progress: Math.min(100, activeProduct.stats.progress + (15 * efficiency * speedBonus)),
-            // Frontend boosts quality
-            quality: activeProduct.stats.quality + (8 * efficiency) + (state.techStack.frontend / 20),
-            bugs: activeProduct.stats.bugs + (state.player.focus < bugChance ? 2 : 0)
+      
+      let activeContract = state.activeContract
+      if (task.type === 'freelance' && activeContract) {
+        activeContract = { 
+          ...activeContract, 
+          progress: Math.min(100, activeContract.progress + (20 * efficiency)) 
+        }
+        
+        if (activeContract.progress >= 100) {
+          newPlayer.money += activeContract.reward
+          newPlayer.reputation += 10
+          state.addLog('SUCCESS: Delivered ' + activeContract.title + '. Paid $' + activeContract.reward + '.');
+          return { 
+            player: newPlayer, 
+            activeContract: null, 
+            portfolio: [...state.portfolio, { ...activeContract, result: 'success' }] 
           }
         }
       }
-      if (task.type === 'marketing') {
-        newPlayer.reputation += 5 * efficiency
-      }
+
       if (task.type === 'rest') {
         newPlayer.energy = Math.min(100, newPlayer.energy + 40)
         newPlayer.focus = Math.min(100, newPlayer.focus + 25)
       }
 
-      return { player: newPlayer, activeProduct, techStack: techGrowth }
+      return { player: newPlayer, activeContract }
     })
     state.addLog('Finished: ' + task.name)
   },
 
   checkLosingConditions: () => {
     const state = get()
-    if (state.player.money <= -1000) set({ isGameOver: true, gameOverReason: 'Bankruptcy.' })
-    else if (state.player.focus <= 0) set({ isGameOver: true, gameOverReason: 'Burnout.' })
-  }
+    if (state.player.money <= -500) set({ isGameOver: true, gameOverReason: 'Evicted.' })
+    else if (state.player.energy <= 0) set({ isGameOver: true, gameOverReason: 'Collapsed.' })
+  },
 }))

@@ -1,6 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { PRODUCT_TYPES, TARGET_MARKETS, FOCUS_PRIORITIES } from '../data/productData';
+
+const Selector = ({ label, options, field, form, setForm }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] uppercase text-zinc-500 tracking-widest font-bold">{label}</label>
+    <div className="grid grid-cols-2 gap-2">
+      {options.map(opt => (
+        <button
+          key={opt}
+          onClick={() => setForm({ ...form, [field]: opt })}
+          className={"text-xs py-2 px-3 rounded-lg border transition-all " + 
+                     (form[field] === opt ? "bg-zinc-100 text-zinc-950 border-white" : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700")}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 export const ProductModal = () => {
   const isOpen = useGameStore((state) => state.isCreatingProduct);
@@ -15,24 +33,6 @@ export const ProductModal = () => {
   });
 
   if (!isOpen) return null;
-
-  const Selector = ({ label, options, field }) => (
-    <div className="space-y-2">
-      <label className="text-[10px] uppercase text-zinc-500 tracking-widest font-bold">{label}</label>
-      <div className="grid grid-cols-2 gap-2">
-        {options.map(opt => (
-          <button
-            key={opt}
-            onClick={() => setForm({ ...form, [field]: opt })}
-            className={"text-xs py-2 px-3 rounded-lg border transition-all " + 
-                       (form[field] === opt ? "bg-zinc-100 text-zinc-950 border-white" : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700")}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 z-40 bg-zinc-950/80 backdrop-blur-md flex items-center justify-center p-6">
@@ -56,9 +56,9 @@ export const ProductModal = () => {
             />
           </div>
 
-          <Selector label="Category" options={PRODUCT_TYPES} field="type" />
-          <Selector label="Target Market" options={TARGET_MARKETS} field="market" />
-          <Selector label="Priority" options={FOCUS_PRIORITIES} field="focus" />
+          <Selector label="Category" options={PRODUCT_TYPES} field="type" form={form} setForm={setForm} />
+          <Selector label="Target Market" options={TARGET_MARKETS} field="market" form={form} setForm={setForm} />
+          <Selector label="Priority" options={FOCUS_PRIORITIES} field="focus" form={form} setForm={setForm} />
         </div>
 
         <button 
