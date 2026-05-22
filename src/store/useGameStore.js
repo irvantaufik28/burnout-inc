@@ -197,10 +197,10 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     if (state.currentTask) return
     
-    // Anti-exploit: Verify contract is still active if it is a freelance task
+    // Anti-exploit: Verify contract is still active
     if (task.type === 'freelance') {
         if (!state.activeContract || state.activeContract.status !== 'active') {
-            state.addLog('Error: No active contract to work on.');
+            state.addLog('Error: No active contract.');
             return;
         }
     }
@@ -231,58 +231,56 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     const efficiency = state.player.focus / 100
     
-    set((state) => {
+    set((s) => {
       const newPlayer = { 
-        ...state.player, 
-        energy: Math.max(0, state.player.energy - (task.energyCost || 0)),
-        focus: Math.max(0, state.player.focus - 5)
+        ...s.player, 
+        energy: Math.max(0, s.player.energy - (task.energyCost || 0)),
+        focus: Math.max(0, s.player.focus - 5)
       }
       
-      let activeContract = state.activeContract
+      let currentActive = s.activeContract
 
       // Handle Freelance Task Completion
-      if (task.type === 'freelance' && activeContract && activeContract.status === 'active') {
-        const newProgress = Math.min(100, activeContract.progress + (20 * efficiency));
+      if (task.type === 'freelance' && currentActive && currentActive.status === 'active') {
+        const newProgress = Math.min(100, currentActive.progress + (25 * efficiency));
         
         if (newProgress >= 100) {
-          // 1. Give rewards once
-          newPlayer.money += activeContract.reward
+          // 1. Mark completed and Archive
+          const completedContract = { ...currentActive, progress: 100, status: 'completed', result: 'success' };
+          
+          // 2. Rewards
+          newPlayer.money += currentActive.reward
           newPlayer.reputation += 10
           
-          // 2. Mark completed and Archive to portfolio
-          const completedContract = { ...activeContract, progress: 100, status: 'completed', result: 'success' };
+          const successMsg = 'SUCCESS: Delivered ' + currentActive.title + '. Paid $' + currentActive.reward + '.';
           
-          // 3. Log success
-          const successMsg = 'SUCCESS: Delivered ' + activeContract.title + '. Paid $' + activeContract.reward + '.';
-          
+          // ATOMIC CLEAR: Clear both activeContract and currentTask
           return { 
             player: newPlayer, 
-            activeContract: null, // Clear active contract immediately
-            currentTask: null, // Ensure task is cleared
-            portfolio: [...state.portfolio, completedContract],
-            logs: [successMsg, ...state.logs].slice(0, 50) // Update logs within same slice
+            activeContract: null, 
+            currentTask: null,
+            portfolio: [...s.portfolio, completedContract],
+            logs: [successMsg, ...s.logs].slice(0, 50)
           }
         } else {
-            // Update progress if not yet 100%
             return { 
                 player: newPlayer, 
-                activeContract: { ...activeContract, progress: newProgress } 
+                activeContract: { ...currentActive, progress: newProgress } 
             }
         }
       }
 
-      // Handle Rest Task
       if (task.type === 'rest') {
         newPlayer.energy = Math.min(100, newPlayer.energy + 40)
         newPlayer.focus = Math.min(100, newPlayer.focus + 25)
       }
 
-      return { player: newPlayer, activeContract }
+      return { player: newPlayer }
     })
 
-    // Log general task finish if not handled above
-    if (task.type !== 'freelance' || (state.activeContract && state.activeContract.progress < 100)) {
-        state.addLog('Finished: ' + task.name)
+    // General log if not already handled
+    if (task.type !== 'freelance' || (get().activeContract && get().activeContract.progress < 100)) {
+        get().addLog('Finished: ' + task.name)
     }
   },
 

@@ -25,11 +25,11 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 ---
 
 ## Architecture Decisions
-1. Zustand for Global State: Central store for all game data. logic is kept in actions to keep components "dumb".
-2. Modular Dashboard: UI is split into specialized panels to keep files small and readable.
+1. Zustand for Global State: Central store for all game data.
+2. Modular Dashboard: UI is split into specialized panels.
 3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
-4. Task System: All major actions (Working on Contract, Resting) consume game hours and advance deadlines.
-5. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived) to prevent exploits.
+4. Task System: Atomic task completion and state cleanup.
+5. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived).
 
 ---
 
@@ -46,7 +46,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Refine Freelance Board System (Randomized varied contracts).
 - [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
 - [x] Implement Interview System (Situational personality-driven).
-- [x] Bug Fix: Prevent repeated execution of completed contracts (Lifecycle Lock).
+- [x] Bug Fix: Ensure active contract card disappears upon completion (UI/State Sync).
 - [ ] Implement Client Archetypes & Feedback.
 
 ---

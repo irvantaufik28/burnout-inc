@@ -13,12 +13,12 @@ To prevent exploits and ensure UI synchronization, contracts follow a strict sta
 5. Failed: Deadline hit zero or project abandoned. Reputation penalty applied, archived to Portfolio as fail.
 6. Archived: Contract moved to Portfolio history. Non-executable.
 
-## UI Synchronization Rules
+## UI Synchronization Rules (CRITICAL)
 - The Active Contract Card must ONLY render if activeContract.status === "active".
 - Upon reaching 100% progress, the activeContract state must be explicitly set to null to clear the UI immediately.
+- The Execute Work button must be disabled if no valid active contract exists.
 
 ## Anti-Exploit Protections
 - One Active Project: Only one contract can be in the active state at a time.
 - Board Removal: Once a contract is moved to active, it is removed from the availableContracts board.
-- Button Failsafe: The Execute Work button is disabled if activeContract.status !== "active".
-- Atomic Completion: Rewards, reputation, and state cleanup happen in a single state slice update.
+- Atomic Cleanup: Rewards, portfolio archiving, and activeContract clearing must happen in a single state mutation.
