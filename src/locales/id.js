@@ -35,6 +35,9 @@ export const id = {
     restDesc: "6 jam istirahat untuk memulihkan vitalitas",
     match: "Match",
     requirements: "Kebutuhan",
+    operationalProtocol: "Protokol Operasional",
+    recovery: "Pemulihan",
+    boosters: "Stimulan",
   },
   freelance: {
     board: "Papan Freelance",
@@ -76,6 +79,10 @@ export const id = {
     takeBreakDesc: "2 jam istirahat untuk memulihkan Fokus",
     allNighter: "Lembur Semalam",
     allNighterDesc: "8 jam kerja keras, penalti berat besok",
+    smoke: "Merokok Saat Coding",
+    smokeDesc: "Kecepatan & fokus sementara, Energi turun nanti",
+    energyDrink: "Minuman Energi",
+    energyDrinkDesc: "Kecepatan agresif, Risiko insomnia",
   },
   interview: {
     title: "Wawancara Langsung",
@@ -138,11 +145,30 @@ export const id = {
   chaos: {
     title: "Insiden Proyek",
     urgent: "URGENT",
+    minor: "Pemberitahuan Kecil",
+    moderate: "Peringatan",
+    major: "Krisis Kritis",
+    progress_update: {
+      title: "Permintaan Update Status",
+      desc: "Klien ingin update cepat soal progres saat ini. Ini mengganggu konsentrasi Anda.",
+      options: {
+        reply: "Kirim balasan detail",
+        ignore: "Abaikan dulu"
+      }
+    },
+    unclear_feedback: {
+      title: "Feedback Tidak Jelas",
+      desc: "Klien mengirim pesan: 'Buat lebih profesional'. Anda tidak yakin maksudnya apa.",
+      options: {
+        ask: "Tanya klarifikasi",
+        guess: "Tebak dan kerjakan"
+      }
+    },
     scope_creep_ui: {
       title: "Scope Creep Mendadak",
       desc: "Klien tiba-tiba meminta dukungan dark mode sebelum milestone berikutnya. Tidak ada dalam kontrak.",
       options: {
-        accept: "Terima Langsung (Biaya Energi)",
+        accept: "Terima Langsung",
         negotiate: "Nego Bayaran Tambahan",
         reject: "Tolak Secara Sopan"
       }
@@ -151,24 +177,24 @@ export const id = {
       title: "Audit Keamanan",
       desc: "Tim keamanan Enterprise meminta review arsitektur lengkap dan pembaruan dokumentasi.",
       options: {
-        do_it: "Kerjakan manual (Kuras Waktu)",
+        do_it: "Kerjakan manual",
         delegate: "Bayar pakar untuk bantu"
       }
     },
-    ai_pivot: {
-      title: "Pivot AI",
-      desc: "Founder melihat tweet viral dan ingin mengganti landing page dengan AI agent.",
+    production_failure: {
+      title: "Produksi Down",
+      desc: "Kegagalan sistem kritis terdeteksi di produksi. Pengguna mengeluh di media sosial.",
       options: {
-        pivot: "Inisialisasi Pivot",
-        stay_course: "Jelaskan risiko hype"
+        fix_it: "Perbaiki segera (Darurat)",
+        blame: "Salahkan penyedia pihak ketiga"
       }
     },
-    emotional_vibe_check: {
-      title: "DM Malam Hari",
-      desc: "Klien sedang panik dan curhat soal visi startup mereka di jam 2 pagi.",
+    angry_escalation: {
+      title: "DM Klien Marah",
+      desc: "Klien sangat marah soal keterlambatan terbaru dan mengancam akan membatalkan kontrak.",
       options: {
-        listen: "Dengarkan dan berempati",
-        ghost: "Cuma baca dan tidur"
+        apologize: "Minta maaf dan kerja lembur",
+        fire_client: "Pecat klien (Penalti Berat)"
       }
     }
   },
@@ -180,5 +206,11 @@ export const id = {
     flow_state: "Flow State",
     burnout_risk: "Burnout Risk",
     production_panic: "Production Panic",
+    caffeine_rush: "Caffeine Rush",
+    nicotine_focus: "Nicotine Focus",
+    overclocked: "Overclocked",
+    focus_crash: "Focus Crash",
+    energy_drain: "Energy Drain",
+    insomnia: "Insomnia",
   }
 };

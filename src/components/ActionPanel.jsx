@@ -10,6 +10,21 @@ const StatusOverlay = ({ message, onClear, t }) => (
   </div>
 );
 
+const ActionButton = ({ action, onClick, disabled }) => (
+  <button 
+    onClick={onClick}
+    disabled={disabled}
+    className={"w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-left transition-all " + 
+               (disabled ? "opacity-40 grayscale cursor-not-allowed" : "hover:border-zinc-700 active:scale-[0.98]")}
+  >
+    <div className="flex justify-between items-center mb-1">
+      <span className="font-bold text-zinc-100 text-sm">{action.name}</span>
+      {action.config.cost > 0 && <span className="text-[10px] font-mono text-emerald-500 font-bold">${action.config.cost}</span>}
+    </div>
+    <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{action.desc}</div>
+  </button>
+);
+
 export const ActionPanel = () => {
   const startTask = useGameStore((state) => state.startTask);
   const currentTask = useGameStore((state) => state.currentTask);
@@ -28,8 +43,13 @@ export const ActionPanel = () => {
 
   const recoveryActions = [
     { id: 'nap', name: t('actions.takeNap'), desc: t('actions.takeNapDesc'), config: { type: 'rest', name: t('actions.takeNap'), duration: 4, energyCost: 0 } },
-    { id: 'coffee', name: t('actions.drinkCoffee'), desc: t('actions.drinkCoffeeDesc'), config: { type: 'coffee', name: t('actions.drinkCoffee'), duration: 0, energyCost: 0 } },
     { id: 'break', name: t('actions.takeBreak'), desc: t('actions.takeBreakDesc'), config: { type: 'rest', name: t('actions.takeBreak'), duration: 2, energyCost: 0 } },
+  ];
+
+  const stimulants = [
+    { id: 'coffee', name: t('actions.drinkCoffee'), desc: t('actions.drinkCoffeeDesc'), config: { type: 'coffee', name: t('actions.drinkCoffee'), duration: 0, energyCost: 0, cost: 5 } },
+    { id: 'smoke', name: t('actions.smoke'), desc: t('actions.smokeDesc'), config: { type: 'smoke', name: t('actions.smoke'), duration: 0, energyCost: 0, cost: 8 } },
+    { id: 'energyDrink', name: t('actions.energyDrink'), desc: t('actions.energyDrinkDesc'), config: { type: 'energyDrink', name: t('actions.energyDrink'), duration: 0, energyCost: 0, cost: 15 } },
   ];
 
   return (
@@ -47,20 +67,20 @@ export const ActionPanel = () => {
         {pending?.status === 'interview' && <StatusOverlay t={t} message={t('freelance.interviewing')} />}
 
         {activeContract?.status === 'active' && (
-          <div className="space-y-3">
-            <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1 italic opacity-50">Operational Protocol</p>
-            {recoveryActions.map(action => (
-              <button 
-                key={action.id}
-                onClick={() => startTask(action.config)}
-                disabled={Boolean(currentTask)}
-                className={"w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-left transition-all " + 
-                           (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:border-zinc-700 active:scale-[0.98]")}
-              >
-                <div className="font-bold text-zinc-100 text-sm">{action.name}</div>
-                <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{action.desc}</div>
-              </button>
-            ))}
+          <div className="space-y-6">
+            <div className="space-y-3">
+               <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1">{t('dashboard.recovery')}</p>
+               {recoveryActions.map(action => (
+                 <ActionButton key={action.id} action={action} onClick={() => startTask(action.config)} disabled={Boolean(currentTask)} />
+               ))}
+            </div>
+
+            <div className="space-y-3">
+               <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1">{t('dashboard.boosters')}</p>
+               {stimulants.map(action => (
+                 <ActionButton key={action.id} action={action} onClick={() => startTask(action.config)} disabled={Boolean(currentTask)} />
+               ))}
+            </div>
           </div>
         )}
 

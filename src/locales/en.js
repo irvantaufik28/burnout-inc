@@ -35,6 +35,9 @@ export const en = {
     restDesc: "6h rest cycle to restore vitals",
     match: "Match",
     requirements: "Requirements",
+    operationalProtocol: "Operational Protocol",
+    recovery: "Recovery",
+    boosters: "Stimulants",
   },
   freelance: {
     board: "Freelance Board",
@@ -76,6 +79,10 @@ export const en = {
     takeBreakDesc: "2h break to restore Focus",
     allNighter: "Pull All Nighter",
     allNighterDesc: "8h heavy grind, severe tomorrow penalty",
+    smoke: "Smoke While Coding",
+    smokeDesc: "Temporary speed & focus, Energy drain later",
+    energyDrink: "Energy Drink",
+    energyDrinkDesc: "Aggressive speed, Insomnia risk",
   },
   interview: {
     title: "Live Interview",
@@ -138,11 +145,30 @@ export const en = {
   chaos: {
     title: "Project Incident",
     urgent: "URGENT",
+    minor: "Minor Notice",
+    moderate: "Warning",
+    major: "Critical Crisis",
+    progress_update: {
+      title: "Status Update Requested",
+      desc: "The client wants a quick update on current progress. It breaks your concentration.",
+      options: {
+        reply: "Send detailed reply",
+        ignore: "Abaikan dulu"
+      }
+    },
+    unclear_feedback: {
+      title: "Vague Feedback",
+      desc: "Client sent a message: 'Make it more professional'. You are not sure what that means.",
+      options: {
+        ask: "Ask for clarification",
+        guess: "Guess and implement"
+      }
+    },
     scope_creep_ui: {
       title: "Sudden Scope Creep",
       desc: "The client wants dark mode support before the next milestone. It wasn't in the contract.",
       options: {
-        accept: "Accept Immediately (Energy Cost)",
+        accept: "Accept Immediately",
         negotiate: "Negotiate for Extra Pay",
         reject: "Politely Decline"
       }
@@ -151,24 +177,24 @@ export const en = {
       title: "Security Audit",
       desc: "The Enterprise security team wants a full architecture review and documentation update.",
       options: {
-        do_it: "Do it manually (Time Drain)",
+        do_it: "Do it manually",
         delegate: "Pay an expert to help"
       }
     },
-    ai_pivot: {
-      title: "The AI Pivot",
-      desc: "The founder saw a viral tweet and wants to replace the landing page with an AI agent.",
+    production_failure: {
+      title: "Production Down",
+      desc: "Critical system failure detected in production. Users are complaining on social media.",
       options: {
-        pivot: "Initialize Pivot",
-        stay_course: "Explain risks of hype"
+        fix_it: "Fix immediately (Emergency)",
+        blame: "Salahkan penyedia pihak ketiga"
       }
     },
-    emotional_vibe_check: {
-      title: "Late Night DM",
-      desc: "The client is having an emotional breakdown about their startup vision at 2 AM.",
+    angry_escalation: {
+      title: "Angry Client DM",
+      desc: "The client is furious about the latest delay and is threatening to cancel the contract.",
       options: {
-        listen: "Listen and empathize",
-        ghost: "Read-receipt and sleep"
+        apologize: "Apologize and over-deliver",
+        fire_client: "Fire the client (Severe Penalty)"
       }
     }
   },
@@ -180,5 +206,11 @@ export const en = {
     flow_state: "Flow State",
     burnout_risk: "Burnout Risk",
     production_panic: "Production Panic",
+    caffeine_rush: "Caffeine Rush",
+    nicotine_focus: "Nicotine Focus",
+    overclocked: "Overclocked",
+    focus_crash: "Focus Crash",
+    energy_drain: "Energy Drain",
+    insomnia: "Insomnia",
   }
 };

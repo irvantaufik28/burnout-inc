@@ -4,27 +4,32 @@
 The unpredictable heart of freelancer life. This system ensures that projects are not just passive progress bars but evolving challenges that require active management and difficult trade-offs.
 
 ## Gameplay Philosophy
-Modern software development is rarely linear. Clients change their minds, bugs appear at 2 AM, and infrastructure fails.
-- Unpredictability: Events trigger randomly during active contracts.
-- Decision Stakes: Every event forces a choice with meaningful consequences (e.g., Money vs. Reputation vs. Burnout).
-- Storytelling: Events create relatable war stories for the player.
+Modern software development is rarely linear. Chaos should feel like mounting pressure, not random unfair punishment.
+- Chaos Tiers: Events are categorized by intensity to ensure a natural escalation.
+- Lasting Scars: Choices primarily create long-term project conditions rather than just instant stat damage.
+- Strategic Decision Stakes: Every event forces a choice with meaningful trade-offs (e.g., Money vs. Reputation vs. Stability).
 
 ## Trigger Logic
-- Frequency: 10-20% chance per game hour (work cycle) when a contract is active.
-- Contextual relevance: Events are filtered by project type (Frontend, Backend, etc.) and client personality.
-- Vulnerability multipliers: Low Focus or Energy increases the likelihood of Mistake type events.
+- Base Frequency: 3.5 percent chance per game hour (work cycle) when a contract is active.
+- Instability Multipliers: Certain project conditions (like Technical Debt) increase the frequency of chaos.
+- Auto-Pause: The game automatically pauses when a chaos event triggers to allow for stress-free decision making.
 
-## Event Structure
-- ID: Unique identifier for localization and tracking.
-- Trigger: Conditions under which the event can occur.
-- Options: 2-3 choices for the player.
-- Consequences: Immediate effects on stats (Money, Energy, Focus, Progress, Bugs, Reputation).
+## Chaos Tiers
 
-## Client Personalities and Chaos
-- Startup Founder: Prone to Scope Creep and Dark Mode requests.
-- Enterprise: Prone to Architecture Reviews and Security Audits.
-- Indie Creator: Prone to Emotional Pivots and Budget Worries.
-- AI Bro: Prone to AI Integration pivots.
+### Tier 1: Minor (Information Icon)
+Small interruptions or niggles. Low impact, mostly affecting Energy or Focus slightly.
+- Reputation Penalty: 0 to -1.
+
+### Tier 2: Moderate (Warning Icon)
+Standard industry challenges. Usually results in a new Project Condition (e.g., Scope Creep).
+- Reputation Penalty: -1 to -3.
+
+### Tier 3: Major (Crisis Icon)
+Critical crises. Rare and highly impactful. Can result in contract termination or severe reputation loss.
+- Reputation Penalty: -3 to -8.
+
+## Consequence Philosophy
+We prioritize Project Conditions over direct stat hits. Adding Burnout Risk is more emotionally engaging and strategically interesting than losing 20 Focus instantly.
 
 ## Localization
 - Tightly integrated with the src/locales/ system.

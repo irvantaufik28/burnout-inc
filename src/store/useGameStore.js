@@ -36,7 +36,8 @@ const INITIAL_STATE = {
   gameOverReason: '',
 
   activeChaosEvent: null,
-  selectedContract: null // For Detail Modal
+  selectedContract: null,
+  conditionTimers: {}
 }
 
 export const useGameStore = create((set, get) => ({
@@ -92,7 +93,6 @@ export const useGameStore = create((set, get) => ({
 
     let efficiency = totalRatio / requirements.length
 
-    // Apply Technical Debt Penalty
     if (contract.conditions?.includes('tech_debt')) {
       efficiency -= PROJECT_CONDITIONS.tech_debt.effects.efficiencyPenalty
     }
@@ -122,10 +122,10 @@ export const useGameStore = create((set, get) => ({
         set((s) => ({ activeContract: { ...s.activeContract, remaining } }))
       }
 
+      state.tickConditionTimers()
       state.tickAutoWork()
 
-      // Chaos Event Trigger
-      const baseChaosChance = 0.1
+      const baseChaosChance = 0.035
       let chaosMult = 1
       state.activeContract.conditions?.forEach(cId => {
         const cond = PROJECT_CONDITIONS[cId]
@@ -136,14 +136,13 @@ export const useGameStore = create((set, get) => ({
         state.triggerChaosEvent()
       }
 
-      // Flow State Trigger (Passive)
       if (!state.activeContract.conditions?.includes('flow_state')) {
-         if (state.player.focus > 80 && state.player.energy > 50 && Math.random() < 0.05) {
-            state.addProjectCondition('flow_state')
+         if (state.player.focus > 85 && state.player.energy > 60 && Math.random() < 0.04) {
+            state.addProjectCondition('flow_state', 8)
             state.addLog('SYSTEM: Focus peak detected. Entering FLOW STATE.')
          }
       } else {
-         if (state.player.focus < 60 || Math.random() < 0.1) {
+         if (state.player.focus < 65 || Math.random() < 0.08) {
             state.removeProjectCondition('flow_state')
             state.addLog('SYSTEM: Flow state interrupted.')
          }
@@ -167,29 +166,72 @@ export const useGameStore = create((set, get) => ({
     state.checkLosingConditions()
   },
 
-  addProjectCondition: (conditionId) => {
+  tickConditionTimers: () => {
+    const state = get()
+    const newTimers = { ...state.conditionTimers }
+    let changed = false
+
+    Object.entries(newTimers).forEach(([cId, remaining]) => {
+      const next = remaining - 1
+      if (next <= 0) {
+        delete newTimers[cId]
+        state.removeProjectCondition(cId)
+        
+        const condMeta = PROJECT_CONDITIONS[cId]
+        if (condMeta?.aftermath) {
+          state.addProjectCondition(condMeta.aftermath, PROJECT_CONDITIONS[condMeta.aftermath].duration)
+          state.addLog('AFTERMATH: Effect of ' + state.t('condition.' + cId) + ' has faded. Entering ' + state.t('condition.' + condMeta.aftermath) + '.');
+        }
+      } else {
+        newTimers[cId] = next
+      }
+      changed = true
+    })
+
+    if (changed) set({ conditionTimers: newTimers })
+  },
+
+  addProjectCondition: (conditionId, duration = null) => {
     const state = get()
     if (!state.activeContract) return
-    if (state.activeContract.conditions?.includes(conditionId)) return
     
-    set((s) => ({
-      activeContract: {
-        ...s.activeContract,
-        conditions: [...(s.activeContract.conditions || []), conditionId]
+    const stimulantCount = (state.activeContract.conditions || []).filter(c => ['caffeine_rush', 'nicotine_focus', 'overclocked'].includes(c)).length;
+    if (stimulantCount >= 3 && ['caffeine_rush', 'nicotine_focus', 'overclocked'].includes(conditionId)) {
+        state.addLog('WARNING: Your body is vibrating from stimulants. Burnout Risk CRITICAL.');
+        get().addProjectCondition('burnout_risk');
+        return;
+    }
+
+    set((s) => {
+      const conditions = [...(s.activeContract.conditions || [])]
+      if (!conditions.includes(conditionId)) {
+        conditions.push(conditionId)
       }
-    }))
+      
+      const newTimers = { ...s.conditionTimers }
+      if (duration) newTimers[conditionId] = duration
+
+      return {
+        activeContract: { ...s.activeContract, conditions },
+        conditionTimers: newTimers
+      }
+    })
   },
 
   removeProjectCondition: (conditionId) => {
     const state = get()
     if (!state.activeContract) return
     
-    set((s) => ({
-      activeContract: {
-        ...s.activeContract,
-        conditions: (s.activeContract.conditions || []).filter(id => id !== conditionId)
+    set((s) => {
+      const conditions = (s.activeContract.conditions || []).filter(id => id !== conditionId)
+      const newTimers = { ...s.conditionTimers }
+      delete newTimers[conditionId]
+      
+      return {
+        activeContract: { ...s.activeContract, conditions },
+        conditionTimers: newTimers
       }
-    }))
+    })
   },
 
   triggerChaosEvent: () => {
@@ -220,6 +262,23 @@ export const useGameStore = create((set, get) => ({
       const newActiveContract = { ...s.activeContract }
       const newTechStack = { ...s.techStack }
 
+      if (effects.activeContract === null) {
+          const failMsg = 'CONTRACT TERMINATED: ' + state.t('chaos.' + event.id + '.title');
+          return {
+            player: { 
+                ...newPlayer, 
+                money: newPlayer.money + (effects.money || 0),
+                reputation: Math.max(0, newPlayer.reputation + (effects.reputation || 0)) 
+            },
+            activeContract: null,
+            portfolio: [...s.portfolio, { ...newActiveContract, status: 'failed', result: 'fail' }],
+            activeChaosEvent: null,
+            conditionTimers: {},
+            gameTime: { ...s.gameTime, isPaused: false },
+            logs: [failMsg, ...s.logs].slice(0, 50)
+          }
+      }
+
       if (effects.money) newPlayer.money += effects.money
       if (effects.energy) newPlayer.energy = Math.max(0, Math.min(100, newPlayer.energy + effects.energy))
       if (effects.focus) newPlayer.focus = Math.max(0, Math.min(100, newPlayer.focus + effects.focus))
@@ -237,10 +296,13 @@ export const useGameStore = create((set, get) => ({
         if (!newActiveContract.conditions) newActiveContract.conditions = []
         if (!newActiveContract.conditions.includes(effects.addCondition)) {
            newActiveContract.conditions.push(effects.addCondition)
+           const meta = PROJECT_CONDITIONS[effects.addCondition]
+           if (meta?.duration) s.conditionTimers[effects.addCondition] = meta.duration
         }
       }
       if (effects.removeCondition) {
         newActiveContract.conditions = (newActiveContract.conditions || []).filter(id => id !== effects.removeCondition)
+        delete s.conditionTimers[effects.removeCondition]
       }
 
       return { 
@@ -333,7 +395,7 @@ export const useGameStore = create((set, get) => ({
 
     const generateContract = (archetype, index) => {
       const reward = Math.floor(Math.random() * (archetype.rewardRange[1] - archetype.rewardRange[0])) + archetype.rewardRange[0];
-      const penalty = Math.floor(Math.random() * (archetype.penaltyRange[1] - archetype.archetype?.penaltyRange?.[0] || archetype.penaltyRange[0])) + archetype.penaltyRange[0];
+      const penalty = Math.floor(Math.random() * (archetype.penaltyRange[1] - (archetype.penaltyRange[0] || 0))) + archetype.penaltyRange[0];
       const repGain = Math.floor(Math.random() * (archetype.repRange[1] - archetype.repRange[0])) + archetype.repRange[0];
       const repLoss = Math.floor(repGain * 1.5);
       const deadline = Math.floor(Math.random() * (archetype.deadlineRange[1] - archetype.deadlineRange[0])) + archetype.deadlineRange[0];
@@ -378,7 +440,7 @@ export const useGameStore = create((set, get) => ({
         status: 'waiting', 
         delay: Math.floor(Math.random() * 3) + 2 
       },
-      selectedContract: null // Close modal
+      selectedContract: null 
     })
     state.addLog('SENDING CV: Reviewing previous history for ' + contract.company + '...');
   },
@@ -393,7 +455,8 @@ export const useGameStore = create((set, get) => ({
     set((s) => ({ 
       activeContract: { ...contract, progress: 0, status: 'active', conditions: [] }, 
       availableContracts: s.availableContracts.filter(c => c.id !== contract.id),
-      pendingApplication: null 
+      pendingApplication: null,
+      conditionTimers: {}
     }))
     get().addLog('Contract Approved: Project for ' + contract.company + ' is now active.');
   },
@@ -414,6 +477,7 @@ export const useGameStore = create((set, get) => ({
       },
       activeContract: null,
       portfolio: [...s.portfolio, completedContract],
+      conditionTimers: {},
       logs: [successMsg, ...s.logs].slice(0, 50)
     }))
   },
@@ -433,6 +497,7 @@ export const useGameStore = create((set, get) => ({
       portfolio: [...s.portfolio, { ...contract, status: 'failed', result: 'fail' }],
       activeContract: null,
       currentTask: null,
+      conditionTimers: {},
       logs: [failMsg, ...s.logs].slice(0, 50)
     }))
   },
@@ -445,7 +510,16 @@ export const useGameStore = create((set, get) => ({
       state.addLog('Critical: Insufficient Energy.');
       return
     }
-    set({ currentTask: { ...task, remaining: task.duration } })
+    
+    if (task.cost && state.player.money < task.cost) {
+      state.addLog('Critical: Insufficient Capital.');
+      return
+    }
+
+    set((s) => ({
+        player: { ...s.player, money: s.player.money - (task.cost || 0) },
+        currentTask: { ...task, remaining: task.duration }
+    }))
     state.addLog('Started: ' + task.name)
   },
 
@@ -467,19 +541,32 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     
     set((s) => {
+      let recoveryMult = 1
+      s.activeContract?.conditions?.forEach(cId => {
+        const cond = PROJECT_CONDITIONS[cId]
+        if (cond?.effects?.recoveryEfficiency) recoveryMult *= cond.effects.recoveryEfficiency
+      })
+
       const newPlayer = { 
         ...s.player, 
         energy: Math.max(0, s.player.energy - (task.energyCost || 0)),
       }
       
       if (task.type === 'rest') {
-        newPlayer.energy = Math.min(100, newPlayer.energy + 40)
-        newPlayer.focus = Math.min(100, newPlayer.focus + 30)
+        newPlayer.energy = Math.min(100, newPlayer.energy + (40 * recoveryMult))
+        newPlayer.focus = Math.min(100, newPlayer.focus + (30 * recoveryMult))
       }
 
       if (task.type === 'coffee') {
-        newPlayer.energy = Math.min(100, newPlayer.energy + 25)
-        newPlayer.focus = Math.max(0, newPlayer.focus - 10)
+        state.addProjectCondition('caffeine_rush', PROJECT_CONDITIONS.caffeine_rush.duration)
+      }
+      
+      if (task.type === 'smoke') {
+        state.addProjectCondition('nicotine_focus', PROJECT_CONDITIONS.nicotine_focus.duration)
+      }
+      
+      if (task.type === 'energyDrink') {
+        state.addProjectCondition('overclocked', PROJECT_CONDITIONS.overclocked.duration)
       }
 
       return { player: newPlayer }
@@ -490,7 +577,7 @@ export const useGameStore = create((set, get) => ({
 
   checkLosingConditions: () => {
     const state = get()
-    if (state.player.money <= -500) set({ isGameOver: true, gameOverReason: 'Evicted.' })
-    else if (state.player.energy <= 0) set({ isGameOver: true, gameOverReason: 'Collapsed.' })
+    if (state.player.money <= -1000) set({ isGameOver: true, gameOverReason: 'Bankruptcy & Eviction.' })
+    else if (state.player.energy <= 0) set({ isGameOver: true, gameOverReason: 'Critical Collapse.' })
   },
 }))

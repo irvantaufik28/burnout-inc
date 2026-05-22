@@ -20,6 +20,7 @@ export const TaskPanel = () => {
   const currentTask = useGameStore((state) => state.currentTask);
   const activeContract = useGameStore((state) => state.activeContract);
   const player = useGameStore((state) => state.player);
+  const conditionTimers = useGameStore((state) => state.conditionTimers);
   const getEfficiency = useGameStore((state) => state.getMatchEfficiency);
   const t = useGameStore((state) => state.t);
 
@@ -81,10 +82,21 @@ export const TaskPanel = () => {
         <div className="mb-8 flex flex-wrap gap-2">
            {activeContract.conditions.map(cId => {
              const cond = PROJECT_CONDITIONS[cId];
+             const remaining = conditionTimers[cId];
              return (
-               <div key={cId} className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg animate-in slide-in-from-left duration-300">
-                  <span className="text-xs">{cond?.icon}</span>
-                  <span className={"text-[10px] font-bold uppercase tracking-tighter " + cond?.color}>{t('condition.' + cId)}</span>
+               <div key={cId} className="flex flex-col bg-zinc-950 border border-zinc-800 px-3 py-2 rounded-xl animate-in slide-in-from-left duration-300 min-w-[100px]">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">{cond?.icon}</span>
+                    <span className={"text-[10px] font-bold uppercase tracking-tighter " + cond?.color}>{t('condition.' + cId)}</span>
+                  </div>
+                  {remaining && (
+                    <div className="mt-1 flex justify-between items-center">
+                       <div className="h-0.5 flex-1 bg-zinc-900 rounded-full overflow-hidden mr-2">
+                          <div className={"h-full " + cond?.color} style={{ width: (remaining / (cond.duration || 1)) * 100 + "%" }}></div>
+                       </div>
+                       <span className="text-[8px] text-zinc-600 font-mono">{remaining}h</span>
+                    </div>
+                  )}
                </div>
              )
            })}
