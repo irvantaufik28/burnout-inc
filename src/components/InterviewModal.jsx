@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../store/useGameStore';
-import { INTERVIEW_QUESTIONS, CLIENT_PREFERENCES, GET_FEEDBACK } from '../data/interviewData';
+import { INTERVIEW_QUESTIONS, CLIENT_PREFERENCES } from '../data/interviewData';
 
 export const InterviewModal = () => {
   const pending = useGameStore((state) => state.pendingApplication);
@@ -51,15 +51,17 @@ export const InterviewModal = () => {
       const matches = newVibes.filter(v => v === targetVibe).length;
       const successChance = (matches * 40) + 30; 
       
-      // Moved roll into the async flow to satisfy purity rules
       setTimeout(() => {
         const roll = Math.random() * 100;
         if (roll < successChance) {
-          const feedback = GET_FEEDBACK(newVibes[0], clientType);
+          const mainVibe = newVibes[0];
+          const feedbackKey = mainVibe === targetVibe ? mainVibe : 'neutral';
+          const feedback = t('interview.feedback.' + feedbackKey);
+          
           addLog('INTERVIEW: ' + feedback);
           acceptContract(pending.contract);
         } else {
-          addLog('INTERVIEW: ' + t('interview.failMsg'));
+          addLog('INTERVIEW: ' + t('interview.culturalFitFail'));
           rejectPending();
         }
       }, 1500);
@@ -93,17 +95,19 @@ export const InterviewModal = () => {
           <>
             <div className="space-y-6">
               <div className="text-zinc-200 text-lg font-medium leading-relaxed italic">
-                "{currentQ?.text}"
+                "{t('interview.questions.' + currentQ.id + '.question')}"
               </div>
               
               <div className="grid grid-cols-1 gap-3">
-                {currentQ?.options.map((opt, i) => (
+                {currentQ.options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => handleAnswer(opt.vibe)}
                     className="bg-zinc-950/50 hover:bg-zinc-800 border border-zinc-800 p-5 rounded-2xl text-left text-sm transition-all active:scale-95 group flex items-center justify-between"
                   >
-                    <span className="text-zinc-400 group-hover:text-zinc-100">{opt.text}</span>
+                    <span className="text-zinc-400 group-hover:text-zinc-100">
+                      {t('interview.questions.' + currentQ.id + '.options.' + opt.id)}
+                    </span>
                     <span className="text-zinc-800 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">{t('common.select')}</span>
                   </button>
                 ))}

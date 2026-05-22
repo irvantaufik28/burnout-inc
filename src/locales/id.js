@@ -48,5 +48,55 @@ export const id = {
     scenario: "Skenario",
     failMsg: "Wawancara Gagal: Klien memilih orang lain.",
     successMsg: "Wawancara Berhasil: Klien terkesan denganmu.",
+    culturalFitFail: "Klien merasa Anda tidak cocok secara budaya.",
+    questions: {
+      startup_deadline: {
+        question: "Kami butuh MVP besok pagi. Sanggup?",
+        options: {
+          a: "Grind tiada henti. Saya kerjakan.",
+          b: "Saya perlu meninjau risiko scope-nya.",
+          c: "Jika kita sederhanakan fiturnya, mungkin saja."
+        }
+      },
+      ai_hype: {
+        question: "Bagaimana jika kita tambahkan label 'AI-powered' di copy marketing kita?",
+        options: {
+          a: "Disruptif. Ayo otomasi semuanya.",
+          b: "Tapi apakah benar menggunakan AI?",
+          c: "Boleh, jika itu membantu brand kita."
+        }
+      },
+      no_budget: {
+        question: "Kami belum punya budget sekarang, tapi kami punya 'passion' yang besar.",
+        options: {
+          a: "Passion tidak bisa membayar tagihan kopi saya.",
+          b: "Saya suka visinya. Saya fleksibel.",
+          c: "Ayo buat demo viral dan cari VC."
+        }
+      },
+      server_crash: {
+        question: "Server crash. Apa prioritas utama Anda?",
+        options: {
+          a: "Posting tweet keren bahwa kita sedang 'scaling'.",
+          b: "Ikuti protokol pemulihan darurat.",
+          c: "Perbaiki secepatnya, dokumentasi belakangan."
+        }
+      },
+      scope_creep: {
+        question: "Bisakah kita tambahkan dukungan mobile juga hari Jumat nanti?",
+        options: {
+          a: "Tidak masalah, kopi menyelesaikan segalanya.",
+          b: "Kita butuh formulir permintaan perubahan resmi.",
+          c: "Mari kita lihat apa yang bisa kita masukkan."
+        }
+      }
+    },
+    feedback: {
+      aggressive: "Klien menyukai energi startup Anda.",
+      stable: "Klien terkesan dengan profesionalisme Anda.",
+      flexible: "Klien menghargai empati Anda.",
+      hype: "Klien bersemangat dengan visi otomasi Anda.",
+      neutral: "Klien merasa vibe Anda kurang cocok."
+    }
   }
 };

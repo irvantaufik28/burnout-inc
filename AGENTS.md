@@ -49,6 +49,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Refine Freelance Board System (Randomized varied contracts).
 - [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
 - [x] Implement Interview System (Situational personality-driven).
+- [x] Fix: Decouple interview text from logic for full localization support.
 - [ ] Implement Client Archetypes & Feedback.
 - [ ] Implement Contract Chaos Events.
 - [ ] Implement Portfolio System.

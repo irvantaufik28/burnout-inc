@@ -1,52 +1,46 @@
 /**
- * Situational Interview Questions
- * Instead of 'Right/Wrong', each option has a personality 'vibe'.
- * 
- * Vibe Keys:
- * - aggressive: Startup Founder (Likes)
- * - stable: Enterprise (Likes)
- * - flexible: Indie (Likes)
- * - hype: AI Bro (Likes)
+ * Situational Interview Questions (Metadata Only)
+ * All text is managed in src/locales/
  */
 export const INTERVIEW_QUESTIONS = [
   {
-    text: "We need the MVP by tomorrow morning. Can you pull it off?",
+    id: "startup_deadline",
     options: [
-      { text: "Grind never stops. I'm on it.", vibe: 'aggressive' },
-      { text: "I need to review the scope for risks.", vibe: 'stable' },
-      { text: "If we simplify features, maybe.", vibe: 'flexible' }
+      { id: "a", vibe: 'aggressive' },
+      { id: "b", vibe: 'stable' },
+      { id: "c", vibe: 'flexible' }
     ]
   },
   {
-    text: "How do you feel about adding 'AI-powered' to our marketing copy?",
+    id: "ai_hype",
     options: [
-      { text: "Disruptive. Let's automate everything.", vibe: 'hype' },
-      { text: "Is it actually using AI though?", vibe: 'stable' },
-      { text: "Sure, if it helps the brand.", vibe: 'flexible' }
+      { id: "a", vibe: 'hype' },
+      { id: "b", vibe: 'stable' },
+      { id: "c", vibe: 'flexible' }
     ]
   },
   {
-    text: "We don't have a budget right now, but we have massive 'passion'.",
+    id: "no_budget",
     options: [
-      { text: "Passion doesn't pay my coffee bills.", vibe: 'stable' },
-      { text: "I love the vision. I'm flexible.", vibe: 'flexible' },
-      { text: "Let's build a viral demo and find VCs.", vibe: 'aggressive' }
+      { id: "a", vibe: 'stable' },
+      { id: "b", vibe: 'flexible' },
+      { id: "c", vibe: 'aggressive' }
     ]
   },
   {
-    text: "The server crashed. What is your first priority?",
+    id: "server_crash",
     options: [
-      { text: "Post a cool 'we are scaling' tweet.", vibe: 'hype' },
-      { text: "Follow the emergency recovery protocol.", vibe: 'stable' },
-      { text: "Fix it fast, documentation later.", vibe: 'aggressive' }
+      { id: "a", vibe: 'hype' },
+      { id: "b", vibe: 'stable' },
+      { id: "c", vibe: 'aggressive' }
     ]
   },
   {
-    text: "Can we also add mobile support by Friday?",
+    id: "scope_creep",
     options: [
-      { text: "No problem, coffee solves everything.", vibe: 'aggressive' },
-      { text: "We need a formal change request.", vibe: 'stable' },
-      { text: "Let's see what we can fit in.", vibe: 'flexible' }
+      { id: "a", vibe: 'aggressive' },
+      { id: "b", vibe: 'stable' },
+      { id: "c", vibe: 'flexible' }
     ]
   }
 ];
@@ -58,14 +52,4 @@ export const CLIENT_PREFERENCES = {
   'AI Startup': 'hype',
   'Agency': 'stable',
   'Local Shop': 'flexible'
-};
-
-export const GET_FEEDBACK = (vibe, clientType) => {
-  if (vibe === CLIENT_PREFERENCES[clientType]) {
-    if (vibe === 'aggressive') return "Client loved your startup energy.";
-    if (vibe === 'stable') return "Client was impressed by your professionalism.";
-    if (vibe === 'flexible') return "Client appreciated your empathy.";
-    if (vibe === 'hype') return "Client is hyped for your automation vision.";
-  }
-  return "Client felt the vibe was slightly off.";
 };
