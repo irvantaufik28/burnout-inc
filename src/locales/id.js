@@ -12,6 +12,8 @@ export const id = {
     cancel: "Batal",
     dismiss: "Tutup",
     select: "Pilih",
+    risk: "Risiko",
+    deadline: "Deadline",
   },
   dashboard: {
     title: "BURNOUT INC.",
@@ -40,6 +42,9 @@ export const id = {
     interviewing: "Wawancara sedang berlangsung...",
     success: "SUKSES: Mengirim {title}. Dibayar ${reward}.",
     failure: "GAGAL KRITIS: {title}. {reason} Reputasi menurun.",
+    deadlineCritical: "DEADLINE KRITIS",
+    projectFailed: "PROYEK GAGAL",
+    delayFeedback: "Klien kecewa dengan keterlambatan pengiriman.",
   },
   interview: {
     title: "Wawancara Langsung",

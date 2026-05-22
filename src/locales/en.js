@@ -12,6 +12,8 @@ export const en = {
     cancel: "Cancel",
     dismiss: "Dismiss",
     select: "Select",
+    risk: "Risk",
+    deadline: "Deadline",
   },
   dashboard: {
     title: "BURNOUT INC.",
@@ -40,6 +42,9 @@ export const en = {
     interviewing: "Interview in progress...",
     success: "SUCCESS: Delivered {title}. Paid ${reward}.",
     failure: "CRITICAL FAILURE: {title}. {reason} Reputation decreased.",
+    deadlineCritical: "DEADLINE CRITICAL",
+    projectFailed: "PROJECT FAILED",
+    delayFeedback: "Client disappointed with delivery delay.",
   },
   interview: {
     title: "Live Interview",

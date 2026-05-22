@@ -30,6 +30,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
 4. Task System: Atomic task completion and state cleanup.
 5. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived).
+6. Visual Deadline: A dynamic time bar that acts as the primary failure indicator.
 
 ---
 
@@ -46,8 +47,8 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Refine Freelance Board System (Randomized varied contracts).
 - [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
 - [x] Implement Interview System (Situational personality-driven).
-- [x] Bug Fix: Ensure active contract card disappears upon completion (UI/State Sync).
-- [ ] Implement Client Archetypes & Feedback.
+- [x] Bug Fix: Ensure active contract card disappears upon completion.
+- [x] Implement Visual Deadline Bar (Core failure indicator).
 
 ---
 

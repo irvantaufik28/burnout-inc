@@ -27,6 +27,10 @@ export const ActionPanel = () => {
     if (availableContracts.length === 0) refreshBoard();
   }, [availableContracts.length, refreshBoard]);
 
+  const deadlinePercentage = activeContract ? Math.round((activeContract.remaining / activeContract.deadline) * 100) : 0;
+  const isCritical = deadlinePercentage < 20;
+  const deadlineColor = deadlinePercentage > 50 ? "bg-emerald-500" : deadlinePercentage > 20 ? "bg-yellow-500" : "bg-red-500";
+
   return (
     <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
@@ -53,23 +57,47 @@ export const ActionPanel = () => {
           <StatusOverlay t={t} message={t('freelance.interviewing')} />
         )}
 
-        {/* State: Active Contract - Only render if active */}
+        {/* State: Active Contract - Refined with Deadline Bar */}
         {activeContract?.status === 'active' && (
-          <div className="bg-emerald-950/10 border border-emerald-500/20 p-5 rounded-xl space-y-4">
-            <div>
-              <p className="text-emerald-500 text-[9px] font-bold uppercase tracking-widest mb-1">{t('freelance.activeContract')}</p>
-              <h3 className="text-zinc-100 font-bold">{activeContract.title}</h3>
+          <div className={"border p-5 rounded-xl space-y-5 transition-all " + (isCritical ? "bg-red-950/10 border-red-500/30 animate-pulse-slow" : "bg-emerald-950/10 border-emerald-500/20")}>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className={"text-[9px] font-bold uppercase tracking-widest mb-1 " + (isCritical ? "text-red-500" : "text-emerald-500")}>
+                  {isCritical ? t('freelance.deadlineCritical') : t('freelance.activeContract')}
+                </p>
+                <h3 className="text-zinc-100 font-bold text-lg">{activeContract.title}</h3>
+              </div>
+              <div className="text-right">
+                <p className="text-zinc-600 text-[8px] uppercase font-bold">{t('common.risk')}</p>
+                <p className="text-zinc-400 text-xs font-mono">{activeContract.risk}</p>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+
+            {/* DEADLINE BAR - Core Failure Indicator */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-[9px] uppercase tracking-tighter text-zinc-500 font-bold">
+                <span>{t('common.deadline')}</span>
+                <span className={isCritical ? "text-red-500" : ""}>{activeContract.remaining + "h remaining"}</span>
+              </div>
+              <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                <div 
+                  className={"h-full transition-all duration-1000 " + deadlineColor} 
+                  style={{ width: deadlinePercentage + "%" }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/50 pt-3">
               <div>
                 <p className="text-zinc-600 text-[8px] uppercase font-bold">Client</p>
                 <p className="text-zinc-400 text-xs truncate">{activeContract.client}</p>
               </div>
-              <div>
+              <div className="text-right">
                 <p className="text-zinc-600 text-[8px] uppercase font-bold">Reward</p>
-                <p className="text-emerald-500 text-xs font-mono">{"$" + activeContract.reward}</p>
+                <p className="text-emerald-500 text-sm font-mono font-bold">{"$" + activeContract.reward}</p>
               </div>
             </div>
+
             <button 
               onClick={() => startTask({ 
                 type: 'freelance', 

@@ -75,17 +75,15 @@ export const useGameStore = create((set, get) => ({
       state.handleNewDay()
     }
 
-    // Tick active contract deadline
     if (state.activeContract && state.activeContract.status === 'active') {
       const remaining = state.activeContract.remaining - 1
       if (remaining <= 0 && state.activeContract.progress < 100) {
-        state.handleContractFailure('Deadline missed.')
+        state.handleContractFailure();
       } else {
         set((s) => ({ activeContract: { ...s.activeContract, remaining } }))
       }
     }
 
-    // Tick pending application (Waiting for response flow)
     if (state.pendingApplication && state.pendingApplication.status === 'waiting') {
       const delay = state.pendingApplication.delay - 1
       if (delay <= 0) {
@@ -123,9 +121,9 @@ export const useGameStore = create((set, get) => ({
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
-      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend' },
-      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend' },
-      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai' }
+      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend', risk: 'Low' },
+      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend', risk: 'Medium' },
+      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai', risk: 'High' }
     ];
 
     const generateContract = (archetype, index) => {
@@ -141,6 +139,7 @@ export const useGameStore = create((set, get) => ({
         remaining: deadline,
         client,
         status: 'available',
+        risk: archetype.risk,
         req: { [archetype.tech]: archetype.tier === 'Easy' ? 0 : archetype.tier === 'Medium' ? 10 : 25 }
       }
     }
@@ -181,23 +180,24 @@ export const useGameStore = create((set, get) => ({
 
   rejectPending: () => set({ pendingApplication: null }),
 
-  handleContractFailure: (reason) => {
+  handleContractFailure: () => {
     const state = get()
     const contract = state.activeContract
+    const failMsg = state.t('freelance.projectFailed') + ': ' + contract.title + '. ' + state.t('freelance.delayFeedback');
+
     set((s) => ({
       player: { ...s.player, reputation: Math.max(0, s.player.reputation - 15), mood: Math.max(0, s.player.mood - 10) },
       portfolio: [...s.portfolio, { ...contract, status: 'failed', result: 'fail' }],
       activeContract: null,
-      currentTask: null
+      currentTask: null,
+      logs: [failMsg, ...s.logs].slice(0, 50)
     }))
-    state.addLog('CRITICAL FAILURE: ' + contract.title + '. ' + reason + ' Reputation decreased.');
   },
 
   startTask: (task) => {
     const state = get()
     if (state.currentTask) return
     
-    // Anti-exploit: Verify contract is still active
     if (task.type === 'freelance') {
         if (!state.activeContract || state.activeContract.status !== 'active') {
             state.addLog('Error: No active contract.');
@@ -240,21 +240,15 @@ export const useGameStore = create((set, get) => ({
       
       let currentActive = s.activeContract
 
-      // Handle Freelance Task Completion
       if (task.type === 'freelance' && currentActive && currentActive.status === 'active') {
         const newProgress = Math.min(100, currentActive.progress + (25 * efficiency));
         
         if (newProgress >= 100) {
-          // 1. Mark completed and Archive
           const completedContract = { ...currentActive, progress: 100, status: 'completed', result: 'success' };
-          
-          // 2. Rewards
           newPlayer.money += currentActive.reward
           newPlayer.reputation += 10
+          const successMsg = state.t('freelance.success').replace('{title}', currentActive.title).replace('${reward}', currentActive.reward);
           
-          const successMsg = 'SUCCESS: Delivered ' + currentActive.title + '. Paid $' + currentActive.reward + '.';
-          
-          // ATOMIC CLEAR: Clear both activeContract and currentTask
           return { 
             player: newPlayer, 
             activeContract: null, 
@@ -278,7 +272,6 @@ export const useGameStore = create((set, get) => ({
       return { player: newPlayer }
     })
 
-    // General log if not already handled
     if (task.type !== 'freelance' || (get().activeContract && get().activeContract.progress < 100)) {
         get().addLog('Finished: ' + task.name)
     }
