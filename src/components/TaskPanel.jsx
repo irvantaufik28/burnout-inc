@@ -1,15 +1,15 @@
 import { useGameStore } from '../store/useGameStore';
 
-const StatBar = ({ label, value, color, pulse = false }) => (
+const StatBar = ({ label, value, color, pulse = false, suffix = "%" }) => (
   <div className="space-y-1.5">
     <div className="flex justify-between text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
       <span>{label}</span>
-      <span className={pulse ? "animate-pulse" : ""}>{Math.round(value) + "%"}</span>
+      <span className={pulse ? "animate-pulse" : ""}>{Math.round(value) + suffix}</span>
     </div>
     <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
       <div 
         className={"h-full transition-all duration-1000 " + color} 
-        style={{ width: value + "%" }}
+        style={{ width: Math.min(100, value) + "%" }}
       ></div>
     </div>
   </div>
@@ -19,6 +19,7 @@ export const TaskPanel = () => {
   const currentTask = useGameStore((state) => state.currentTask);
   const activeContract = useGameStore((state) => state.activeContract);
   const player = useGameStore((state) => state.player);
+  const getEfficiency = useGameStore((state) => state.getMatchEfficiency);
   const t = useGameStore((state) => state.t);
 
   if (!activeContract) {
@@ -52,6 +53,8 @@ export const TaskPanel = () => {
   const isCritical = deadlinePercentage < 20;
   const deadlineColor = deadlinePercentage > 50 ? "bg-emerald-500" : deadlinePercentage > 20 ? "bg-yellow-500" : "bg-red-500";
   const isExhausted = player.energy <= 0;
+  
+  const efficiency = Math.round(getEfficiency(activeContract) * 100);
 
   return (
     <section className={"bg-zinc-900 border-2 p-6 rounded-2xl shadow-xl transition-all " + (isCritical ? "border-red-900/40" : "border-zinc-800")}>
@@ -67,16 +70,21 @@ export const TaskPanel = () => {
           <p className="text-zinc-500 text-[10px] uppercase tracking-widest mt-1 font-bold">{activeContract.client + " // RISK: " + activeContract.risk}</p>
         </div>
         <div className="text-right">
-          <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-black">Capital</p>
-          <p className="text-xl font-mono text-emerald-500 font-bold">{"$" + activeContract.reward}</p>
+          <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-black">{t('freelance.efficiency')}</p>
+          <p className={"text-xl font-mono font-bold " + (efficiency < 50 ? "text-red-500" : "text-zinc-200")}>{efficiency + "%"}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
         <StatBar label={t('common.progress')} value={activeContract.progress} color="bg-blue-600" />
         <StatBar label={t('common.deadline')} value={deadlinePercentage} color={deadlineColor} pulse={isCritical} />
-        <StatBar label={t('common.energy')} value={player.energy} color="bg-blue-400" />
-        <StatBar label={t('common.focus')} value={player.focus} color="bg-purple-500" />
+      </div>
+
+      <div className="pt-6 border-t border-zinc-800/50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <StatBar label={t('common.energy')} value={player.energy} color="bg-blue-400" />
+            <StatBar label={t('common.focus')} value={player.focus} color="bg-purple-500" />
+        </div>
       </div>
 
       {isCritical && (

@@ -33,6 +33,8 @@ export const id = {
     reqNotMet: "Persyaratan belum terpenuhi",
     systemRecovery: "Pemulihan Sistem",
     restDesc: "6 jam istirahat untuk memulihkan vitalitas",
+    match: "Match",
+    requirements: "Kebutuhan",
   },
   freelance: {
     board: "Papan Freelance",
@@ -50,6 +52,13 @@ export const id = {
     working: "Bekerja...",
     exhausted: "Kelelahan",
     pacing: "Menjaga ritme...",
+    efficiency: "Efisiensi",
+  },
+  eval: {
+    perfect: "Perfect Match",
+    good: "Acceptable Match",
+    risky: "Risky Contract",
+    disaster: "Disaster Waiting To Happen",
   },
   actions: {
     takeNap: "Tidur Sejenak",

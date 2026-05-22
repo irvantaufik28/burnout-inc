@@ -28,9 +28,10 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 1. Zustand for Global State: Central store for all game data.
 2. Modular Dashboard: UI is split into specialized panels.
 3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
-4. Task System: Manages recovery actions (Nap, Coffee, Break).
-5. Auto-Work System: Projects progress passively based on player vitals (Energy/Focus).
-6. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived).
+4. Task System: Atomic task completion and state cleanup.
+5. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived).
+6. Visual Deadline: A dynamic time bar that acts as the primary failure indicator.
+7. Project Requirement System: Progress speed depends on skill match efficiency between player and contract.
 
 ---
 
@@ -50,6 +51,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Bug Fix: Ensure active contract card disappears upon completion.
 - [x] Implement Visual Deadline Bar (Core failure indicator).
 - [x] Implement Auto-Work System (Passive execution & Recovery management).
+- [x] Implement Project Requirement System (Skill-based efficiency).
 
 ---
 

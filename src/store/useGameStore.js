@@ -11,11 +11,12 @@ const INITIAL_STATE = {
     mood: 100,
     focus: 100,
     reputation: 10,
-    specialization: 'Generalist'
+    specialization: 'Generalist',
+    skills: { coding: 5, design: 5, marketing: 5 }
   },
   techStack: {
-    frontend: 0,
-    backend: 0,
+    frontend: 2,
+    backend: 2,
     ai: 0,
     devops: 0,
     mobile: 0,
@@ -60,6 +61,28 @@ export const useGameStore = create((set, get) => ({
   })),
 
   restartGame: () => set(INITIAL_STATE),
+
+  // --- UTILS ---
+  getMatchEfficiency: (contract) => {
+    const state = get()
+    if (!contract || !contract.req) return 1
+    
+    const capability = {
+      ...state.player.skills,
+      ...state.techStack
+    }
+
+    const requirements = Object.entries(contract.req)
+    if (requirements.length === 0) return 1
+
+    let totalRatio = 0
+    requirements.forEach(([skill, reqValue]) => {
+      const current = capability[skill] || 0
+      totalRatio += Math.min(1.2, current / Math.max(1, reqValue))
+    })
+
+    return totalRatio / requirements.length
+  },
 
   // --- CORE TICK ---
   tickTime: () => {
@@ -109,11 +132,16 @@ export const useGameStore = create((set, get) => ({
     
     if (player.energy <= 0) return
 
+    const efficiency = state.getMatchEfficiency(activeContract)
     const energyMult = player.energy > 20 ? 1 : 0.3
     const focusMult = player.focus / 100
-    const progressGain = 4 * energyMult * focusMult
-    const energyCost = 2 * (1 / energyMult) 
-    const focusCost = 1.5
+    
+    // Base speed influenced by skill match (efficiency)
+    // Modified by physical/mental state
+    const progressGain = 5 * efficiency * energyMult * focusMult
+    
+    const energyCost = 2 * (1 / Math.max(0.5, energyMult)) 
+    const focusCost = 1.5 * (1 / Math.max(0.5, efficiency)) // Harder to focus on things you don't know
 
     const newProgress = Math.min(100, activeContract.progress + progressGain)
 
@@ -150,9 +178,30 @@ export const useGameStore = create((set, get) => ({
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
-      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend', risk: 'Low' },
-      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend', risk: 'Medium' },
-      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai', risk: 'High' }
+      { 
+        tier: 'Easy', 
+        clients: ['Indie Creator', 'Local Shop'], 
+        rewardRange: [100, 200], 
+        deadlineRange: [24, 48], 
+        req: { frontend: 4, design: 4 }, 
+        risk: 'Low' 
+      },
+      { 
+        tier: 'Medium', 
+        clients: ['Startup Founder', 'Agency'], 
+        rewardRange: [300, 600], 
+        deadlineRange: [48, 96], 
+        req: { backend: 12, coding: 8 }, 
+        risk: 'Medium' 
+      },
+      { 
+        tier: 'Hard', 
+        clients: ['Tech Startup', 'AI Startup'], 
+        rewardRange: [800, 1500], 
+        deadlineRange: [72, 144], 
+        req: { ai: 15, backend: 10, coding: 12 }, 
+        risk: 'High' 
+      }
     ];
 
     const generateContract = (archetype, index) => {
@@ -161,7 +210,7 @@ export const useGameStore = create((set, get) => ({
       const client = archetype.clients[Math.floor(Math.random() * archetype.clients.length)];
       return {
         id: 'c-' + Date.now() + '-' + index,
-        title: archetype.tier + ' ' + (archetype.tech === 'ai' ? 'ML Model' : archetype.tech === 'backend' ? 'API' : 'UI'),
+        title: archetype.tier + ' ' + (archetype.req.ai ? 'AI System' : archetype.req.backend ? 'API Server' : 'Web UI'),
         difficulty: archetype.tier,
         reward,
         deadline,
@@ -170,7 +219,7 @@ export const useGameStore = create((set, get) => ({
         status: 'available',
         risk: archetype.risk,
         progress: 0,
-        req: { [archetype.tech]: archetype.tier === 'Easy' ? 0 : archetype.tier === 'Medium' ? 10 : 25 }
+        req: archetype.req
       }
     }
 

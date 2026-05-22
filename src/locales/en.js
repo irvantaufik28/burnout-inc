@@ -33,6 +33,8 @@ export const en = {
     reqNotMet: "Requirements not met",
     systemRecovery: "System Recovery",
     restDesc: "6h rest cycle to restore vitals",
+    match: "Match",
+    requirements: "Requirements",
   },
   freelance: {
     board: "Freelance Board",
@@ -50,6 +52,13 @@ export const en = {
     working: "Working...",
     exhausted: "Exhausted",
     pacing: "Pacing...",
+    efficiency: "Efficiency",
+  },
+  eval: {
+    perfect: "Perfect Match",
+    good: "Acceptable Match",
+    risky: "Risky Contract",
+    disaster: "Disaster Waiting To Happen",
   },
   actions: {
     takeNap: "Take Nap",
