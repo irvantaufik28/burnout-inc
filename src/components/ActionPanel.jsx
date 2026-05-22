@@ -17,7 +17,7 @@ export const ActionPanel = () => {
   const activeContract = useGameStore((state) => state.activeContract);
   const pending = useGameStore((state) => state.pendingApplication);
   const refreshBoard = useGameStore((state) => state.refreshContractBoard);
-  const apply = useGameStore((state) => state.applyForContract);
+  const selectContract = useGameStore((state) => state.selectContract);
   const rejectPending = useGameStore((state) => state.rejectPending);
   const getEfficiency = useGameStore((state) => state.getMatchEfficiency);
   const t = useGameStore((state) => state.t);
@@ -33,7 +33,7 @@ export const ActionPanel = () => {
   ];
 
   return (
-    <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl h-full flex flex-col">
+    <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl h-full flex flex-col shadow-2xl">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-wider">{t('freelance.board')}</h2>
         {!activeContract && !pending && (
@@ -42,20 +42,20 @@ export const ActionPanel = () => {
       </div>
 
       <div className="flex-1 grid grid-cols-1 gap-3 relative">
-        {pending?.status === 'waiting' && <StatusOverlay t={t} message={t('freelance.waiting').replace('{client}', pending.contract.client)} />}
+        {pending?.status === 'waiting' && <StatusOverlay t={t} message={t('freelance.reviewing')} />}
         {pending?.status === 'rejected' && <StatusOverlay t={t} message={t('freelance.rejected')} onClear={rejectPending} />}
         {pending?.status === 'interview' && <StatusOverlay t={t} message={t('freelance.interviewing')} />}
 
         {activeContract?.status === 'active' && (
           <div className="space-y-3">
-            <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1">Management Actions</p>
+            <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1 italic opacity-50">Operational Protocol</p>
             {recoveryActions.map(action => (
               <button 
                 key={action.id}
                 onClick={() => startTask(action.config)}
                 disabled={Boolean(currentTask)}
                 className={"w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-left transition-all " + 
-                           (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:border-zinc-600 active:scale-[0.98]")}
+                           (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:border-zinc-700 active:scale-[0.98]")}
               >
                 <div className="font-bold text-zinc-100 text-sm">{action.name}</div>
                 <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{action.desc}</div>
@@ -72,31 +72,30 @@ export const ActionPanel = () => {
           return (
             <button 
               key={contract.id}
-              onClick={() => apply(contract)}
-              className="w-full bg-zinc-950 border border-zinc-800/80 p-4 rounded-xl text-left transition-all hover:border-zinc-600 active:scale-[0.98]"
+              onClick={() => selectContract(contract)}
+              className="w-full bg-zinc-950 border border-zinc-800/80 p-5 rounded-2xl text-left transition-all hover:border-zinc-600 active:scale-[0.98] group relative overflow-hidden"
             >
-              <div className="flex justify-between items-start mb-1">
-                <span className="font-bold text-zinc-100 text-sm">{contract.title}</span>
-                <span className="text-xs font-mono text-emerald-500">{"$" + contract.reward}</span>
+              <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-zinc-600 text-[8px] font-black uppercase">Click_To_Review</span>
               </div>
               
-              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 mb-3">
-                 {Object.entries(contract.req || {}).map(([skill, val]) => (
-                   <span key={skill} className="text-[8px] uppercase font-bold text-zinc-600">
-                     {skill + " " + val}
-                   </span>
-                 ))}
+              <div className="flex justify-between items-start mb-1">
+                <span className="font-black text-zinc-100 text-sm tracking-tight">{contract.company}</span>
+                <span className="text-xs font-mono text-emerald-500 font-bold">{"$" + contract.reward}</span>
               </div>
+              
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-4">
+                {contract.req.ai ? 'AI System' : contract.req.backend ? 'API Server' : 'Web UI'}
+              </p>
 
-              <div className="flex justify-between items-center border-t border-zinc-900 pt-2">
-                <div className="flex gap-2 text-[9px] uppercase tracking-widest text-zinc-500 font-bold">
+              <div className="flex justify-between items-center border-t border-zinc-900 pt-3">
+                <div className="flex gap-2 text-[8px] uppercase tracking-[0.2em] text-zinc-600 font-black">
                   <span>{contract.difficulty}</span>
                   <span>•</span>
                   <span>{contract.client}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[8px] uppercase text-zinc-600 block leading-none">{t('dashboard.match')}</span>
-                  <span className={"text-[10px] font-bold " + matchColor}>{matchPercent + "%"}</span>
+                  <span className={"text-[10px] font-black " + matchColor}>{matchPercent + "% Match"}</span>
                 </div>
               </div>
             </button>

@@ -35,7 +35,8 @@ const INITIAL_STATE = {
   isGameOver: false,
   gameOverReason: '',
 
-  activeChaosEvent: null
+  activeChaosEvent: null,
+  selectedContract: null // For Detail Modal
 }
 
 export const useGameStore = create((set, get) => ({
@@ -65,6 +66,10 @@ export const useGameStore = create((set, get) => ({
   })),
 
   restartGame: () => set(INITIAL_STATE),
+
+  // --- MODAL ACTIONS ---
+  selectContract: (contract) => set({ selectedContract: contract }),
+  clearSelectedContract: () => set({ selectedContract: null }),
 
   // --- UTILS ---
   getMatchEfficiency: (contract) => {
@@ -138,7 +143,6 @@ export const useGameStore = create((set, get) => ({
             state.addLog('SYSTEM: Focus peak detected. Entering FLOW STATE.')
          }
       } else {
-         // Flow state decay
          if (state.player.focus < 60 || Math.random() < 0.1) {
             state.removeProjectCondition('flow_state')
             state.addLog('SYSTEM: Flow state interrupted.')
@@ -229,7 +233,6 @@ export const useGameStore = create((set, get) => ({
 
       if (effects.ai_familiarity) newTechStack.ai += effects.ai_familiarity
 
-      // Handle Condition Changes
       if (effects.addCondition) {
         if (!newActiveContract.conditions) newActiveContract.conditions = []
         if (!newActiveContract.conditions.includes(effects.addCondition)) {
@@ -262,7 +265,6 @@ export const useGameStore = create((set, get) => ({
     const energyMult = player.energy > 20 ? 1 : 0.3
     const focusMult = player.focus / 100
     
-    // Process Condition Modifiers
     let progressMult = 1
     let energyDrainMult = 1
     let focusDrainMult = 1
@@ -313,21 +315,42 @@ export const useGameStore = create((set, get) => ({
   refreshContractBoard: () => {
     if (get().activeContract || get().pendingApplication) return;
 
+    const companies = ['NeonForge Studio', 'QuantumStack Labs', 'PixelCraft Agency', 'AIFlow Systems', 'NextByte Solutions', 'CloudSprint', 'HyperNest', 'MonoPixel'];
+    const briefs = [
+      'Need a modern SaaS dashboard for internal analytics.',
+      'AI automation for customer support workflow needed.',
+      'Landing page redesign needed before product launch.',
+      'API server optimization for high-traffic mobile app.',
+      'DevOps pipeline setup for a growing startup team.',
+      'Internal tool to manage employee performance.'
+    ];
+
     const archetypes = [
-      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], req: { frontend: 4, design: 4 }, risk: 'Low' },
-      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], req: { backend: 12, coding: 8 }, risk: 'Medium' },
-      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], req: { ai: 15, backend: 10, coding: 12 }, risk: 'High' }
+      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [300, 700], penaltyRange: [50, 150], repRange: [3, 6], deadlineRange: [24, 48], req: { frontend: 4, design: 4 }, risk: 'Low' },
+      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [1000, 2500], penaltyRange: [200, 600], repRange: [8, 15], deadlineRange: [48, 96], req: { backend: 12, coding: 8 }, risk: 'Medium' },
+      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [4000, 9000], penaltyRange: [1000, 3000], repRange: [20, 35], deadlineRange: [72, 144], req: { ai: 15, backend: 10, coding: 12 }, risk: 'High' }
     ];
 
     const generateContract = (archetype, index) => {
       const reward = Math.floor(Math.random() * (archetype.rewardRange[1] - archetype.rewardRange[0])) + archetype.rewardRange[0];
+      const penalty = Math.floor(Math.random() * (archetype.penaltyRange[1] - archetype.archetype?.penaltyRange?.[0] || archetype.penaltyRange[0])) + archetype.penaltyRange[0];
+      const repGain = Math.floor(Math.random() * (archetype.repRange[1] - archetype.repRange[0])) + archetype.repRange[0];
+      const repLoss = Math.floor(repGain * 1.5);
       const deadline = Math.floor(Math.random() * (archetype.deadlineRange[1] - archetype.deadlineRange[0])) + archetype.deadlineRange[0];
       const client = archetype.clients[Math.floor(Math.random() * archetype.clients.length)];
+      const company = companies[Math.floor(Math.random() * companies.length)];
+      const description = briefs[Math.floor(Math.random() * briefs.length)];
+
       return {
         id: 'c-' + Date.now() + '-' + index,
-        title: archetype.tier + ' ' + (archetype.req.ai ? 'AI System' : archetype.req.backend ? 'API Server' : 'Web UI'),
+        title: company + ': ' + (archetype.req.ai ? 'AI Project' : archetype.req.backend ? 'Backend Project' : 'UI Project'),
+        company,
+        description,
         difficulty: archetype.tier,
         reward,
+        penalty,
+        repGain,
+        repLoss,
         deadline,
         remaining: deadline,
         client,
@@ -354,15 +377,16 @@ export const useGameStore = create((set, get) => ({
         contract: { ...contract, status: 'interview' }, 
         status: 'waiting', 
         delay: Math.floor(Math.random() * 3) + 2 
-      } 
+      },
+      selectedContract: null // Close modal
     })
-    state.addLog('Application Sent: Waiting for ' + contract.client + ' to respond...');
+    state.addLog('SENDING CV: Reviewing previous history for ' + contract.company + '...');
   },
 
   resolveContractApplication: () => {
     const state = get()
     set({ pendingApplication: { ...state.pendingApplication, status: 'interview' } })
-    state.addLog('Update: ' + state.pendingApplication.contract.client + ' requested an interview.');
+    state.addLog('Update: ' + state.pendingApplication.contract.company + ' requested an interview.');
   },
 
   acceptContract: (contract) => {
@@ -371,7 +395,7 @@ export const useGameStore = create((set, get) => ({
       availableContracts: s.availableContracts.filter(c => c.id !== contract.id),
       pendingApplication: null 
     }))
-    get().addLog('Contract Approved: ' + contract.title + ' is now active.');
+    get().addLog('Contract Approved: Project for ' + contract.company + ' is now active.');
   },
 
   rejectPending: () => set({ pendingApplication: null }),
@@ -380,13 +404,13 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     const contract = state.activeContract
     const completedContract = { ...contract, progress: 100, status: 'completed', result: 'success' };
-    const successMsg = state.t('freelance.success').replace('{title}', contract.title).replace('${reward}', contract.reward);
+    const successMsg = state.t('freelance.success').replace('{title}', contract.company).replace('${reward}', contract.reward);
 
     set((s) => ({
       player: { 
         ...s.player, 
         money: s.player.money + contract.reward,
-        reputation: s.player.reputation + 10 
+        reputation: s.player.reputation + contract.repGain 
       },
       activeContract: null,
       portfolio: [...s.portfolio, completedContract],
@@ -397,10 +421,15 @@ export const useGameStore = create((set, get) => ({
   handleContractFailure: () => {
     const state = get()
     const contract = state.activeContract
-    const failMsg = state.t('freelance.projectFailed') + ': ' + contract.title + '. ' + state.t('freelance.delayFeedback');
+    const failMsg = state.t('freelance.projectFailed') + ': ' + contract.company + '. ' + state.t('freelance.delayFeedback');
 
     set((s) => ({
-      player: { ...s.player, reputation: Math.max(0, s.player.reputation - 15), mood: Math.max(0, s.player.mood - 10) },
+      player: { 
+        ...s.player, 
+        money: s.player.money - (contract.penalty || 100),
+        reputation: Math.max(0, s.player.reputation - (contract.repLoss || 15)), 
+        mood: Math.max(0, s.player.mood - 10) 
+      },
       portfolio: [...s.portfolio, { ...contract, status: 'failed', result: 'fail' }],
       activeContract: null,
       currentTask: null,

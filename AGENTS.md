@@ -35,6 +35,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 8. Project Requirement System: Progress speed depends on skill match efficiency between player and contract.
 9. Client Chaos System: Randomized incident events that force decision-making during active projects.
 10. Project Condition System: Persistent status effects (Scars) that modify project behavior and difficulty.
+11. Immersive Contract Detail: Projects have company identities, briefs, and explicit failure penalties.
 
 ---
 
@@ -57,6 +58,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Implement Project Requirement System (Skill-based efficiency).
 - [x] Implement Client Chaos System (Randomized incident events & decision stakes).
 - [x] Implement Project Condition System (Persistent status effects/scars).
+- [x] Improve Freelance Detail Experience (Company identity, briefs, risk/reward visuals).
 
 ---
 

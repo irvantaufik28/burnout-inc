@@ -8,6 +8,7 @@ import { ActionPanel } from './components/ActionPanel';
 import { LogPanel } from './components/LogPanel';
 import { InterviewModal } from './components/InterviewModal';
 import { ChaosEventModal } from './components/ChaosEventModal';
+import { FreelanceProjectDetailModal } from './components/FreelanceProjectDetailModal';
 
 function App() {
   const tickTime = useGameStore((state) => state.tickTime);
@@ -73,6 +74,7 @@ function App() {
       {/* Overlays */}
       <InterviewModal />
       <ChaosEventModal />
+      <FreelanceProjectDetailModal />
     </main>
   );
 }
