@@ -1,4 +1,5 @@
 import { useGameStore } from '../store/useGameStore';
+import { PROJECT_CONDITIONS } from '../data/projectConditions';
 
 const StatBar = ({ label, value, color, pulse = false, suffix = "%" }) => (
   <div className="space-y-1.5">
@@ -74,6 +75,21 @@ export const TaskPanel = () => {
           <p className={"text-xl font-mono font-bold " + (efficiency < 50 ? "text-red-500" : "text-zinc-200")}>{efficiency + "%"}</p>
         </div>
       </div>
+
+      {/* Conditions Display */}
+      {activeContract.conditions?.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-2">
+           {activeContract.conditions.map(cId => {
+             const cond = PROJECT_CONDITIONS[cId];
+             return (
+               <div key={cId} className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg animate-in slide-in-from-left duration-300">
+                  <span className="text-xs">{cond?.icon}</span>
+                  <span className={"text-[10px] font-bold uppercase tracking-tighter " + cond?.color}>{t('condition.' + cId)}</span>
+               </div>
+             )
+           })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
         <StatBar label={t('common.progress')} value={activeContract.progress} color="bg-blue-600" />

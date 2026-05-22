@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { en } from '../locales/en'
 import { id } from '../locales/id'
 import { CHAOS_EVENTS } from '../data/chaosEvents'
+import { PROJECT_CONDITIONS } from '../data/projectConditions'
 
 const locales = { en, id }
 
@@ -65,6 +66,7 @@ export const useGameStore = create((set, get) => ({
 
   restartGame: () => set(INITIAL_STATE),
 
+  // --- UTILS ---
   getMatchEfficiency: (contract) => {
     const state = get()
     if (!contract || !contract.req) return 1
@@ -83,9 +85,17 @@ export const useGameStore = create((set, get) => ({
       totalRatio += Math.min(1.2, current / Math.max(1, reqValue))
     })
 
-    return totalRatio / requirements.length
+    let efficiency = totalRatio / requirements.length
+
+    // Apply Technical Debt Penalty
+    if (contract.conditions?.includes('tech_debt')) {
+      efficiency -= PROJECT_CONDITIONS.tech_debt.effects.efficiencyPenalty
+    }
+
+    return Math.max(0.1, efficiency)
   },
 
+  // --- CORE TICK ---
   tickTime: () => {
     const state = get()
     if (state.isGameOver || state.activeChaosEvent) return
@@ -109,8 +119,30 @@ export const useGameStore = create((set, get) => ({
 
       state.tickAutoWork()
 
-      if (Math.random() < 0.1) {
+      // Chaos Event Trigger
+      const baseChaosChance = 0.1
+      let chaosMult = 1
+      state.activeContract.conditions?.forEach(cId => {
+        const cond = PROJECT_CONDITIONS[cId]
+        if (cond?.effects?.chaosChanceMult) chaosMult *= cond.effects.chaosChanceMult
+      })
+
+      if (Math.random() < (baseChaosChance * chaosMult)) {
         state.triggerChaosEvent()
+      }
+
+      // Flow State Trigger (Passive)
+      if (!state.activeContract.conditions?.includes('flow_state')) {
+         if (state.player.focus > 80 && state.player.energy > 50 && Math.random() < 0.05) {
+            state.addProjectCondition('flow_state')
+            state.addLog('SYSTEM: Focus peak detected. Entering FLOW STATE.')
+         }
+      } else {
+         // Flow state decay
+         if (state.player.focus < 60 || Math.random() < 0.1) {
+            state.removeProjectCondition('flow_state')
+            state.addLog('SYSTEM: Flow state interrupted.')
+         }
       }
     }
 
@@ -129,6 +161,31 @@ export const useGameStore = create((set, get) => ({
 
     if (state.currentTask) state.tickTask()
     state.checkLosingConditions()
+  },
+
+  addProjectCondition: (conditionId) => {
+    const state = get()
+    if (!state.activeContract) return
+    if (state.activeContract.conditions?.includes(conditionId)) return
+    
+    set((s) => ({
+      activeContract: {
+        ...s.activeContract,
+        conditions: [...(s.activeContract.conditions || []), conditionId]
+      }
+    }))
+  },
+
+  removeProjectCondition: (conditionId) => {
+    const state = get()
+    if (!state.activeContract) return
+    
+    set((s) => ({
+      activeContract: {
+        ...s.activeContract,
+        conditions: (s.activeContract.conditions || []).filter(id => id !== conditionId)
+      }
+    }))
   },
 
   triggerChaosEvent: () => {
@@ -172,6 +229,17 @@ export const useGameStore = create((set, get) => ({
 
       if (effects.ai_familiarity) newTechStack.ai += effects.ai_familiarity
 
+      // Handle Condition Changes
+      if (effects.addCondition) {
+        if (!newActiveContract.conditions) newActiveContract.conditions = []
+        if (!newActiveContract.conditions.includes(effects.addCondition)) {
+           newActiveContract.conditions.push(effects.addCondition)
+        }
+      }
+      if (effects.removeCondition) {
+        newActiveContract.conditions = (newActiveContract.conditions || []).filter(id => id !== effects.removeCondition)
+      }
+
       return { 
         player: newPlayer, 
         activeContract: newActiveContract, 
@@ -193,9 +261,23 @@ export const useGameStore = create((set, get) => ({
     const efficiency = state.getMatchEfficiency(activeContract)
     const energyMult = player.energy > 20 ? 1 : 0.3
     const focusMult = player.focus / 100
-    const progressGain = 5 * efficiency * energyMult * focusMult
-    const energyCost = 2 * (1 / Math.max(0.5, energyMult)) 
-    const focusCost = 1.5 * (1 / Math.max(0.5, efficiency))
+    
+    // Process Condition Modifiers
+    let progressMult = 1
+    let energyDrainMult = 1
+    let focusDrainMult = 1
+
+    activeContract.conditions?.forEach(cId => {
+      const cond = PROJECT_CONDITIONS[cId]
+      if (!cond) return
+      if (cond.effects.progressMult) progressMult *= cond.effects.progressMult
+      if (cond.effects.energyDrainMult) energyDrainMult *= cond.effects.energyDrainMult
+      if (cond.effects.focusDrainMult) focusDrainMult *= cond.effects.focusDrainMult
+    })
+
+    const progressGain = 5 * efficiency * energyMult * focusMult * progressMult
+    const energyCost = 2 * (1 / Math.max(0.5, energyMult)) * energyDrainMult
+    const focusCost = 1.5 * (1 / Math.max(0.5, efficiency)) * focusDrainMult
 
     const newProgress = Math.min(100, activeContract.progress + progressGain)
 
@@ -232,30 +314,9 @@ export const useGameStore = create((set, get) => ({
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
-      { 
-        tier: 'Easy', 
-        clients: ['Indie Creator', 'Local Shop'], 
-        rewardRange: [100, 200], 
-        deadlineRange: [24, 48], 
-        req: { frontend: 4, design: 4 }, 
-        risk: 'Low' 
-      },
-      { 
-        tier: 'Medium', 
-        clients: ['Startup Founder', 'Agency'], 
-        rewardRange: [300, 600], 
-        deadlineRange: [48, 96], 
-        req: { backend: 12, coding: 8 }, 
-        risk: 'Medium' 
-      },
-      { 
-        tier: 'Hard', 
-        clients: ['Tech Startup', 'AI Startup'], 
-        rewardRange: [800, 1500], 
-        deadlineRange: [72, 144], 
-        req: { ai: 15, backend: 10, coding: 12 }, 
-        risk: 'High' 
-      }
+      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], req: { frontend: 4, design: 4 }, risk: 'Low' },
+      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], req: { backend: 12, coding: 8 }, risk: 'Medium' },
+      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], req: { ai: 15, backend: 10, coding: 12 }, risk: 'High' }
     ];
 
     const generateContract = (archetype, index) => {
@@ -275,7 +336,8 @@ export const useGameStore = create((set, get) => ({
         progress: 0,
         req: archetype.req,
         quality: 0,
-        bugs: 0
+        bugs: 0,
+        conditions: []
       }
     }
 
@@ -305,7 +367,7 @@ export const useGameStore = create((set, get) => ({
 
   acceptContract: (contract) => {
     set((s) => ({ 
-      activeContract: { ...contract, progress: 0, status: 'active' }, 
+      activeContract: { ...contract, progress: 0, status: 'active', conditions: [] }, 
       availableContracts: s.availableContracts.filter(c => c.id !== contract.id),
       pendingApplication: null 
     }))

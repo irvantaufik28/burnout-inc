@@ -53,6 +53,7 @@ export const en = {
     exhausted: "Exhausted",
     pacing: "Pacing...",
     efficiency: "Efficiency",
+    conditions: "Project Conditions",
   },
   eval: {
     perfect: "Perfect Match",
@@ -164,5 +165,14 @@ export const en = {
         ghost: "Read-receipt and sleep"
       }
     }
+  },
+  condition: {
+    scope_creep: "Scope Creep",
+    tech_debt: "Technical Debt",
+    client_distrust: "Client Distrust",
+    crunch_mode: "Crunch Mode",
+    flow_state: "Flow State",
+    burnout_risk: "Burnout Risk",
+    production_panic: "Production Panic",
   }
 };

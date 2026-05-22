@@ -34,6 +34,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 7. Visual Deadline: A dynamic time bar that acts as the primary failure indicator.
 8. Project Requirement System: Progress speed depends on skill match efficiency between player and contract.
 9. Client Chaos System: Randomized incident events that force decision-making during active projects.
+10. Project Condition System: Persistent status effects (Scars) that modify project behavior and difficulty.
 
 ---
 
@@ -55,6 +56,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Implement Auto-Work System (Passive execution & Recovery management).
 - [x] Implement Project Requirement System (Skill-based efficiency).
 - [x] Implement Client Chaos System (Randomized incident events & decision stakes).
+- [x] Implement Project Condition System (Persistent status effects/scars).
 
 ---
 

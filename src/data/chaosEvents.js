@@ -7,11 +7,11 @@ export const CHAOS_EVENTS = [
   {
     id: 'scope_creep_ui',
     archetype: 'Startup Founder',
-    requirement: { type: 'Frontend' }, // Project type hint
+    requirement: { type: 'Frontend' },
     options: [
-      { id: 'accept', effect: { progress: -10, reputation: 5, focus: -10 } },
-      { id: 'negotiate', effect: { reward: 100, mood: -10 } },
-      { id: 'reject', effect: { reputation: -5 } }
+      { id: 'accept', effect: { addCondition: 'scope_creep', reputation: 10 } },
+      { id: 'negotiate', effect: { reward: 200, mood: -10, addCondition: 'client_distrust' } },
+      { id: 'reject', effect: { reputation: -10, addCondition: 'client_distrust' } }
     ]
   },
   {
@@ -19,8 +19,8 @@ export const CHAOS_EVENTS = [
     archetype: 'Enterprise',
     requirement: { type: 'Backend' },
     options: [
-      { id: 'do_it', effect: { focus: -20, quality: 10 } },
-      { id: 'delegate', effect: { money: -50, progress: 5 } }
+      { id: 'do_it', effect: { addCondition: 'tech_debt', focus: -20 } },
+      { id: 'delegate', effect: { money: -100, removeCondition: 'tech_debt' } }
     ]
   },
   {
@@ -28,16 +28,16 @@ export const CHAOS_EVENTS = [
     archetype: 'AI Startup',
     requirement: { type: 'AI' },
     options: [
-      { id: 'pivot', effect: { progress: -20, reputation: 10, ai_familiarity: 5 } },
-      { id: 'stay_course', effect: { focus: -5, reputation: -2 } }
+      { id: 'pivot', effect: { progress: -30, addCondition: 'crunch_mode', reputation: 15 } },
+      { id: 'stay_course', effect: { focus: -10, addCondition: 'client_distrust' } }
     ]
   },
   {
     id: 'emotional_vibe_check',
     archetype: 'Indie Creator',
     options: [
-      { id: 'listen', effect: { mood: 10, focus: -10 } },
-      { id: 'ghost', effect: { reputation: -10, focus: 5 } }
+      { id: 'listen', effect: { mood: 15, addCondition: 'flow_state' } },
+      { id: 'ghost', effect: { reputation: -15, addCondition: 'client_distrust' } }
     ]
   }
 ];

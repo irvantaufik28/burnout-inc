@@ -53,6 +53,7 @@ export const id = {
     exhausted: "Kelelahan",
     pacing: "Menjaga ritme...",
     efficiency: "Efisiensi",
+    conditions: "Kondisi Proyek",
   },
   eval: {
     perfect: "Perfect Match",
@@ -164,5 +165,14 @@ export const id = {
         ghost: "Cuma baca dan tidur"
       }
     }
+  },
+  condition: {
+    scope_creep: "Scope Creep",
+    tech_debt: "Technical Debt",
+    client_distrust: "Client Distrust",
+    crunch_mode: "Crunch Mode",
+    flow_state: "Flow State",
+    burnout_risk: "Burnout Risk",
+    production_panic: "Production Panic",
   }
 };
