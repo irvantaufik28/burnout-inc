@@ -61,6 +61,7 @@ export const useGameStore = create((set, get) => ({
 
   restartGame: () => set(INITIAL_STATE),
 
+  // --- CORE TICK ---
   tickTime: () => {
     const state = get()
     if (state.isGameOver) return
@@ -74,7 +75,7 @@ export const useGameStore = create((set, get) => ({
       state.handleNewDay()
     }
 
-    if (state.activeContract) {
+    if (state.activeContract && state.activeContract.status === 'active') {
       const remaining = state.activeContract.remaining - 1
       if (remaining <= 0 && state.activeContract.progress < 100) {
         state.handleContractFailure('Deadline missed.')
@@ -117,6 +118,10 @@ export const useGameStore = create((set, get) => ({
   },
 
   refreshContractBoard: () => {
+    // Only refresh if NO active contract and NO pending application
+    // This prevents board spamming and ensures focus
+    if (get().activeContract || get().pendingApplication) return;
+
     const archetypes = [
       { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend' },
       { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend' },
@@ -135,6 +140,7 @@ export const useGameStore = create((set, get) => ({
         deadline,
         remaining: deadline,
         client,
+        status: 'available',
         req: { [archetype.tech]: archetype.tier === 'Easy' ? 0 : archetype.tier === 'Medium' ? 10 : 25 }
       }
     }
@@ -149,7 +155,7 @@ export const useGameStore = create((set, get) => ({
     
     set({ 
       pendingApplication: { 
-        contract, 
+        contract: { ...contract, status: 'interview' }, 
         status: 'waiting', 
         delay: Math.floor(Math.random() * 3) + 2 
       } 
@@ -165,10 +171,11 @@ export const useGameStore = create((set, get) => ({
   },
 
   acceptContract: (contract) => {
-    set({ 
-      activeContract: { ...contract, progress: 0 }, 
+    set((s) => ({ 
+      activeContract: { ...contract, progress: 0, status: 'active' }, 
+      availableContracts: s.availableContracts.filter(c => c.id !== contract.id),
       pendingApplication: null 
-    })
+    }))
     get().addLog('Contract Approved: ' + contract.title + ' is now active.');
   },
 
@@ -179,7 +186,7 @@ export const useGameStore = create((set, get) => ({
     const contract = state.activeContract
     set((s) => ({
       player: { ...s.player, reputation: Math.max(0, s.player.reputation - 15), mood: Math.max(0, s.player.mood - 10) },
-      portfolio: [...s.portfolio, { ...contract, result: 'fail' }],
+      portfolio: [...s.portfolio, { ...contract, status: 'failed', result: 'fail' }],
       activeContract: null,
       currentTask: null
     }))
@@ -189,6 +196,15 @@ export const useGameStore = create((set, get) => ({
   startTask: (task) => {
     const state = get()
     if (state.currentTask) return
+    
+    // Anti-exploit: Verify contract is still active if it is a freelance task
+    if (task.type === 'freelance') {
+        if (!state.activeContract || state.activeContract.status !== 'active') {
+            state.addLog('Error: No active contract to work on.');
+            return;
+        }
+    }
+
     if (state.player.energy < (task.energyCost || 0)) {
       state.addLog('Critical: Insufficient Energy.');
       return
@@ -223,7 +239,7 @@ export const useGameStore = create((set, get) => ({
       }
       
       let activeContract = state.activeContract
-      if (task.type === 'freelance' && activeContract) {
+      if (task.type === 'freelance' && activeContract && activeContract.status === 'active') {
         activeContract = { 
           ...activeContract, 
           progress: Math.min(100, activeContract.progress + (20 * efficiency)) 
@@ -236,7 +252,7 @@ export const useGameStore = create((set, get) => ({
           return { 
             player: newPlayer, 
             activeContract: null, 
-            portfolio: [...state.portfolio, { ...activeContract, result: 'success' }] 
+            portfolio: [...state.portfolio, { ...activeContract, status: 'completed', result: 'success' }] 
           }
         }
       }

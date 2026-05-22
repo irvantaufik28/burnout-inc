@@ -20,8 +20,6 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 1. Docs First: Always read AGENTS.md and /docs before implementing new features.
 2. Document Every System: No major system exists without a dedicated .md file in /docs.
 3. Localization Rule: Every gameplay system and UI text MUST support English and Indonesian from the start.
-   - Files: src/locales/en.js and src/locales/id.js.
-   - Technical terms (Frontend, Backend, AI, etc.) remain in English.
 4. Update Progress: Keep the Progress Log below updated for every change.
 
 ---
@@ -31,8 +29,7 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 2. Modular Dashboard: UI is split into specialized panels to keep files small and readable.
 3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
 4. Task System: All major actions (Working on Contract, Resting) consume game hours and advance deadlines.
-5. Interview System: Situational mini-game focused on personality/vibe matching.
-6. Client Archetypes: MEMORABLE personalities that affect contract difficulty and feedback.
+5. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived) to prevent exploits.
 
 ---
 
@@ -49,11 +46,8 @@ Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a
 - [x] Refine Freelance Board System (Randomized varied contracts).
 - [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
 - [x] Implement Interview System (Situational personality-driven).
-- [x] Fix: Decouple interview text from logic for full localization support.
+- [x] Bug Fix: Prevent repeated execution of completed contracts (Lifecycle Lock).
 - [ ] Implement Client Archetypes & Feedback.
-- [ ] Implement Contract Chaos Events.
-- [ ] Implement Portfolio System.
-- [ ] Implement Recurring Clients.
 
 ---
 
