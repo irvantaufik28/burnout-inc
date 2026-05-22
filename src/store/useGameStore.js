@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { en } from '../locales/en'
 import { id } from '../locales/id'
+import { CHAOS_EVENTS } from '../data/chaosEvents'
 
 const locales = { en, id }
 
@@ -32,6 +33,8 @@ const INITIAL_STATE = {
   logs: ['System Boot: Freelancer Survival Mode Active.'],
   isGameOver: false,
   gameOverReason: '',
+
+  activeChaosEvent: null // { id, contract, options }
 }
 
 export const useGameStore = create((set, get) => ({
@@ -87,7 +90,7 @@ export const useGameStore = create((set, get) => ({
   // --- CORE TICK ---
   tickTime: () => {
     const state = get()
-    if (state.isGameOver) return
+    if (state.isGameOver || state.activeChaosEvent) return
 
     let { hour, day } = state.gameTime
     hour += 1
@@ -107,6 +110,11 @@ export const useGameStore = create((set, get) => ({
       }
 
       state.tickAutoWork()
+
+      // Random Chaos Event Trigger (10% per hour)
+      if (Math.random() < 0.1) {
+        state.triggerChaosEvent()
+      }
     }
 
     if (state.pendingApplication && state.pendingApplication.status === 'waiting') {
@@ -126,6 +134,60 @@ export const useGameStore = create((set, get) => ({
     state.checkLosingConditions()
   },
 
+  triggerChaosEvent: () => {
+    const state = get()
+    const p = state.activeContract
+    if (!p) return
+
+    // Find applicable events based on archetype
+    const possibleEvents = CHAOS_EVENTS.filter(e => !e.archetype || e.archetype === p.client);
+    if (possibleEvents.length === 0) return
+
+    const event = possibleEvents[Math.floor(Math.random() * possibleEvents.length)]
+    set({ activeChaosEvent: event })
+    get().togglePause() // Auto pause for decisions
+  },
+
+  resolveChaosEvent: (optionId) => {
+    const state = get()
+    const event = state.activeChaosEvent
+    if (!event) return
+
+    const option = event.options.find(o => o.id === optionId)
+    if (!option) return
+
+    const effects = option.effect || {}
+    
+    set((s) => {
+      const newPlayer = { ...s.player }
+      const newActiveContract = { ...s.activeContract }
+      const newTechStack = { ...s.techStack }
+
+      if (effects.money) newPlayer.money += effects.money
+      if (effects.energy) newPlayer.energy = Math.max(0, Math.min(100, newPlayer.energy + effects.energy))
+      if (effects.focus) newPlayer.focus = Math.max(0, Math.min(100, newPlayer.focus + effects.focus))
+      if (effects.mood) newPlayer.mood = Math.max(0, Math.min(100, newPlayer.mood + effects.mood))
+      if (effects.reputation) newPlayer.reputation += effects.reputation
+      
+      if (effects.progress) newActiveContract.progress = Math.max(0, Math.min(100, newActiveContract.progress + effects.progress))
+      if (effects.reward) newActiveContract.reward += effects.reward
+      if (effects.quality) newActiveContract.quality += effects.quality
+      if (effects.bugs) newActiveContract.bugs += effects.bugs
+
+      if (effects.ai_familiarity) newTechStack.ai += effects.ai_familiarity
+
+      return { 
+        player: newPlayer, 
+        activeContract: newActiveContract, 
+        techStack: newTechStack,
+        activeChaosEvent: null,
+        gameTime: { ...s.gameTime, isPaused: false } // Resume
+      }
+    })
+
+    state.addLog('CHAOS RESOLVED: ' + state.t('chaos.' + event.id + '.title'));
+  },
+
   tickAutoWork: () => {
     const state = get()
     const { player, activeContract } = state
@@ -135,13 +197,9 @@ export const useGameStore = create((set, get) => ({
     const efficiency = state.getMatchEfficiency(activeContract)
     const energyMult = player.energy > 20 ? 1 : 0.3
     const focusMult = player.focus / 100
-    
-    // Base speed influenced by skill match (efficiency)
-    // Modified by physical/mental state
     const progressGain = 5 * efficiency * energyMult * focusMult
-    
     const energyCost = 2 * (1 / Math.max(0.5, energyMult)) 
-    const focusCost = 1.5 * (1 / Math.max(0.5, efficiency)) // Harder to focus on things you don't know
+    const focusCost = 1.5 * (1 / Math.max(0.5, efficiency))
 
     const newProgress = Math.min(100, activeContract.progress + progressGain)
 
@@ -178,30 +236,9 @@ export const useGameStore = create((set, get) => ({
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
-      { 
-        tier: 'Easy', 
-        clients: ['Indie Creator', 'Local Shop'], 
-        rewardRange: [100, 200], 
-        deadlineRange: [24, 48], 
-        req: { frontend: 4, design: 4 }, 
-        risk: 'Low' 
-      },
-      { 
-        tier: 'Medium', 
-        clients: ['Startup Founder', 'Agency'], 
-        rewardRange: [300, 600], 
-        deadlineRange: [48, 96], 
-        req: { backend: 12, coding: 8 }, 
-        risk: 'Medium' 
-      },
-      { 
-        tier: 'Hard', 
-        clients: ['Tech Startup', 'AI Startup'], 
-        rewardRange: [800, 1500], 
-        deadlineRange: [72, 144], 
-        req: { ai: 15, backend: 10, coding: 12 }, 
-        risk: 'High' 
-      }
+      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend', risk: 'Low' },
+      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend', risk: 'Medium' },
+      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai', risk: 'High' }
     ];
 
     const generateContract = (archetype, index) => {
@@ -210,7 +247,7 @@ export const useGameStore = create((set, get) => ({
       const client = archetype.clients[Math.floor(Math.random() * archetype.clients.length)];
       return {
         id: 'c-' + Date.now() + '-' + index,
-        title: archetype.tier + ' ' + (archetype.req.ai ? 'AI System' : archetype.req.backend ? 'API Server' : 'Web UI'),
+        title: archetype.tier + ' ' + (archetype.tech === 'ai' ? 'AI System' : archetype.tech === 'backend' ? 'API Server' : 'Web UI'),
         difficulty: archetype.tier,
         reward,
         deadline,
@@ -219,7 +256,9 @@ export const useGameStore = create((set, get) => ({
         status: 'available',
         risk: archetype.risk,
         progress: 0,
-        req: archetype.req
+        req: archetype.req,
+        quality: 0,
+        bugs: 0
       }
     }
 

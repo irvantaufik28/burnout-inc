@@ -127,5 +127,42 @@ export const id = {
       hype: "Klien bersemangat dengan visi otomasi Anda.",
       neutral: "Klien merasa vibe Anda kurang cocok."
     }
+  },
+  chaos: {
+    title: "Insiden Proyek",
+    urgent: "URGENT",
+    scope_creep_ui: {
+      title: "Scope Creep Mendadak",
+      desc: "Klien tiba-tiba meminta dukungan dark mode sebelum milestone berikutnya. Tidak ada dalam kontrak.",
+      options: {
+        accept: "Terima Langsung (Biaya Energi)",
+        negotiate: "Nego Bayaran Tambahan",
+        reject: "Tolak Secara Sopan"
+      }
+    },
+    architecture_review: {
+      title: "Audit Keamanan",
+      desc: "Tim keamanan Enterprise meminta review arsitektur lengkap dan pembaruan dokumentasi.",
+      options: {
+        do_it: "Kerjakan manual (Kuras Waktu)",
+        delegate: "Bayar pakar untuk bantu"
+      }
+    },
+    ai_pivot: {
+      title: "Pivot AI",
+      desc: "Founder melihat tweet viral dan ingin mengganti landing page dengan AI agent.",
+      options: {
+        pivot: "Inisialisasi Pivot",
+        stay_course: "Jelaskan risiko hype"
+      }
+    },
+    emotional_vibe_check: {
+      title: "DM Malam Hari",
+      desc: "Klien sedang panik dan curhat soal visi startup mereka di jam 2 pagi.",
+      options: {
+        listen: "Dengarkan dan berempati",
+        ghost: "Cuma baca dan tidur"
+      }
+    }
   }
 };

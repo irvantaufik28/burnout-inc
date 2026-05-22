@@ -127,5 +127,42 @@ export const en = {
       hype: "Client is hyped for your automation vision.",
       neutral: "Client felt the vibe was slightly off."
     }
+  },
+  chaos: {
+    title: "Project Incident",
+    urgent: "URGENT",
+    scope_creep_ui: {
+      title: "Sudden Scope Creep",
+      desc: "The client wants dark mode support before the next milestone. It wasn't in the contract.",
+      options: {
+        accept: "Accept Immediately (Energy Cost)",
+        negotiate: "Negotiate for Extra Pay",
+        reject: "Politely Decline"
+      }
+    },
+    architecture_review: {
+      title: "Security Audit",
+      desc: "The Enterprise security team wants a full architecture review and documentation update.",
+      options: {
+        do_it: "Do it manually (Time Drain)",
+        delegate: "Pay an expert to help"
+      }
+    },
+    ai_pivot: {
+      title: "The AI Pivot",
+      desc: "The founder saw a viral tweet and wants to replace the landing page with an AI agent.",
+      options: {
+        pivot: "Initialize Pivot",
+        stay_course: "Explain risks of hype"
+      }
+    },
+    emotional_vibe_check: {
+      title: "Late Night DM",
+      desc: "The client is having an emotional breakdown about their startup vision at 2 AM.",
+      options: {
+        listen: "Listen and empathize",
+        ghost: "Read-receipt and sleep"
+      }
+    }
   }
 };

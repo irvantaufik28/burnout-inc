@@ -1,101 +1,79 @@
+import { useEffect } from 'react';
 import { useGameStore } from './store/useGameStore';
-import { useGameLoop } from './hooks/useGameLoop';
-
-// Components
-import { StatsPanel } from './components/StatsPanel';
-import { ActionPanel } from './components/ActionPanel';
-import { ConsoleLog } from './components/ConsoleLog';
+import { Header } from './components/Header';
+import { StatPanel } from './components/StatPanel';
+import { TechPanel } from './components/TechPanel';
 import { TaskPanel } from './components/TaskPanel';
-import { GameOver } from './components/GameOver';
+import { ActionPanel } from './components/ActionPanel';
+import { LogPanel } from './components/LogPanel';
 import { InterviewModal } from './components/InterviewModal';
-
-const SpeedButton = ({ val, currentSpeed, setSpeed }) => (
-  <button 
-    onClick={() => setSpeed(val)}
-    className={"px-3 py-1 text-[10px] font-bold rounded " + (currentSpeed === val ? "bg-zinc-100 text-zinc-950" : "bg-zinc-900 text-zinc-500 hover:bg-zinc-800")}
-  >
-    {val + "X"}
-  </button>
-);
+import { ChaosEventModal } from './components/ChaosEventModal';
 
 function App() {
-  useGameLoop(1000);
-
+  const tickTime = useGameStore((state) => state.tickTime);
   const gameTime = useGameStore((state) => state.gameTime);
-  const setSpeed = useGameStore((state) => state.setSpeed);
-  const togglePause = useGameStore((state) => state.togglePause);
-  const setLanguage = useGameStore((state) => state.setLanguage);
-  const currentLang = useGameStore((state) => state.language);
-  const t = useGameStore((state) => state.t);
+  const isGameOver = useGameStore((state) => state.isGameOver);
+  const gameOverReason = useGameStore((state) => state.gameOverReason);
+  const restartGame = useGameStore((state) => state.restartGame);
+
+  useEffect(() => {
+    let timer;
+    if (!gameTime.isPaused && !isGameOver) {
+      timer = setInterval(() => {
+        tickTime();
+      }, 1000 / gameTime.speed);
+    }
+    return () => clearInterval(timer);
+  }, [gameTime.isPaused, gameTime.speed, isGameOver, tickTime]);
+
+  if (isGameOver) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 text-zinc-100 font-sans">
+        <div className="text-center space-y-8 max-w-md">
+          <div className="space-y-2">
+            <h1 className="text-6xl font-black tracking-tighter text-red-600">GAME OVER</h1>
+            <p className="text-zinc-500 uppercase tracking-widest text-sm font-bold">{gameOverReason}</p>
+          </div>
+          <button 
+            onClick={restartGame}
+            className="w-full bg-zinc-100 text-zinc-950 py-4 rounded-2xl font-black uppercase tracking-tighter hover:bg-white active:scale-95 transition-all"
+          >
+            Reboot System
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-6 font-sans flex flex-col items-center">
-      <div className="max-w-7xl w-full">
-        <GameOver />
-        <InterviewModal />
-
-        {/* Top Header */}
-        <header className="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-zinc-900 pb-6 gap-6">
-          <div className="text-center md:text-left">
-            <h1 className="text-2xl font-black tracking-tighter text-zinc-100">{t('dashboard.title')}</h1>
-            <p className="text-zinc-500 text-xs uppercase tracking-[0.3em] mt-1 font-semibold text-emerald-900">{t('dashboard.subtitle')}</p>
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 font-sans p-4 md:p-8 selection:bg-emerald-500 selection:text-emerald-950">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <Header />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Stats & Tech */}
+          <div className="lg:col-span-3 space-y-6">
+            <StatPanel />
+            <TechPanel />
           </div>
 
-          <div className="flex items-center gap-8 bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50">
-            <div className="text-center">
-              <p className="text-zinc-600 text-[9px] uppercase tracking-widest font-bold mb-1">Language</p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setLanguage('en')} className={"px-2 py-1 text-[10px] rounded " + (currentLang === 'en' ? "bg-zinc-100 text-zinc-950" : "text-zinc-500")}>EN</button>
-                <button onClick={() => setLanguage('id')} className={"px-2 py-1 text-[10px] rounded " + (currentLang === 'id' ? "bg-zinc-100 text-zinc-950" : "text-zinc-500")}>ID</button>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <p className="text-zinc-600 text-[9px] uppercase tracking-widest font-bold mb-1">Time Speed</p>
-              <div className="flex items-center gap-1">
-                <SpeedButton val={1} currentSpeed={gameTime.speed} setSpeed={setSpeed} />
-                <SpeedButton val={2} currentSpeed={gameTime.speed} setSpeed={setSpeed} />
-                <SpeedButton val={4} currentSpeed={gameTime.speed} setSpeed={setSpeed} />
-              </div>
-            </div>
-            
-            <div className="w-[1px] h-8 bg-zinc-800"></div>
-
-            <div className="text-right">
-              <div className="text-xl font-mono tracking-tight text-zinc-200">
-                {t('common.day') + " " + gameTime.day + " • " + String(gameTime.hour).padStart(2, '0') + ":00"}
-              </div>
-              <button 
-                onClick={togglePause}
-                className="text-[10px] uppercase text-zinc-500 hover:text-zinc-300 font-bold tracking-widest"
-              >
-                {gameTime.isPaused ? t('common.resume') : t('common.pause')}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-3">
-            <StatsPanel />
-          </div>
-
-          <div className="lg:col-span-5 space-y-8">
+          {/* Middle Column: Active Work */}
+          <div className="lg:col-span-6 space-y-6">
             <TaskPanel />
+            <LogPanel />
+          </div>
+
+          {/* Right Column: Board & Actions */}
+          <div className="lg:col-span-3 h-full">
             <ActionPanel />
           </div>
-
-          <div className="lg:col-span-4">
-            <ConsoleLog />
-          </div>
         </div>
-
-        <footer className="mt-20 py-10 border-t border-zinc-900 text-center opacity-30 grayscale pointer-events-none">
-          <p className="text-zinc-400 text-[10px] tracking-[0.5em] uppercase text-zinc-800">Survival_Protocol_V1 // status: operational</p>
-        </footer>
       </div>
-    </div>
+
+      {/* Overlays */}
+      <InterviewModal />
+      <ChaosEventModal />
+    </main>
   );
 }
 
