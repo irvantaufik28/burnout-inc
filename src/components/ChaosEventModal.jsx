@@ -52,7 +52,16 @@ export const ChaosEventModal = () => {
                 <span className="text-zinc-400 group-hover:text-zinc-100 font-medium">
                   {t(eventKey + '.options.' + opt.id)}
                 </span>
-                <span className="text-zinc-800 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">{t('common.select')}</span>
+                
+                {/* DEV HINT: Menampilkan efek dari setiap pilihan */}
+                <div className="flex gap-1">
+                    {Object.entries(opt.effect || {}).map(([key, val]) => (
+                        <span key={key} className="text-[7px] font-black bg-zinc-900 text-zinc-500 px-1 py-0.5 rounded uppercase border border-zinc-800">
+                            {key}:{val > 0 ? "+" : ""}{val}
+                        </span>
+                    ))}
+                    <span className="text-zinc-800 text-[8px] font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter ml-2">{t('common.select')}</span>
+                </div>
               </button>
             ))}
           </div>

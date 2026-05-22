@@ -1,4 +1,5 @@
 import { useGameStore } from '../store/useGameStore';
+import { getCalendarDate, formatCalendarDate, formatTime } from '../utils/calendarUtils';
 
 export const Header = () => {
   const gameTime = useGameStore((state) => state.gameTime);
@@ -8,6 +9,8 @@ export const Header = () => {
   const setLanguage = useGameStore((state) => state.setLanguage);
   const t = useGameStore((state) => state.t);
 
+  const currentDate = getCalendarDate(gameTime.day, gameTime.hour);
+
   return (
     <header className="flex flex-col md:flex-row justify-between items-center bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl gap-6">
       <div>
@@ -16,12 +19,19 @@ export const Header = () => {
       </div>
 
       <div className="flex items-center gap-8">
-        {/* Time Display */}
-        <div className="text-center">
-          <p className="text-[9px] uppercase font-black text-zinc-600 tracking-tighter mb-1">{t('common.day')} {gameTime.day}</p>
-          <p className="text-2xl font-mono font-bold text-zinc-100">
-            {String(gameTime.hour).padStart(2, '0')}:00
+        {/* Full Calendar Display */}
+        <div className="text-right">
+          <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">
+            {formatCalendarDate(currentDate, language)}
           </p>
+          <div className="flex items-center justify-end gap-3">
+             <p className="text-2xl font-mono font-bold text-zinc-100 tracking-tighter">
+                {formatTime(gameTime.hour)}
+             </p>
+             <div className="bg-zinc-800 px-2 py-0.5 rounded text-[8px] font-black text-zinc-400 uppercase tracking-tighter">
+                Day {gameTime.day}
+             </div>
+          </div>
         </div>
 
         {/* Speed Controls */}

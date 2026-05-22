@@ -74,6 +74,29 @@ export const PROJECT_CONDITIONS = {
     aftermath: 'insomnia'
   },
 
+  // --- STIMULANT FATIGUE CONDITIONS ---
+  overstimulated: {
+    id: 'overstimulated',
+    icon: '⚡',
+    color: 'text-yellow-600',
+    duration: 12,
+    effects: { focusDrainMult: 1.8, recoveryEfficiency: 0.6 }
+  },
+  anxiety: {
+    id: 'anxiety',
+    icon: '😟',
+    color: 'text-indigo-600',
+    duration: 16,
+    effects: { chaosChanceMult: 2.5, focusStability: -0.3 }
+  },
+  focus_instability: {
+    id: 'focus_instability',
+    icon: '🌀',
+    color: 'text-purple-400',
+    duration: 10,
+    effects: { randomSpeedFluctuation: true, focusDrainMult: 1.4 }
+  },
+
   // --- AFTERMATH CONDITIONS ---
   focus_crash: {
     id: 'focus_crash',

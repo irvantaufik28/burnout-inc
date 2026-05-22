@@ -14,7 +14,6 @@ export const InterviewModal = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [activeQuestions, setActiveQuestions] = useState([]);
 
-  // Initialize interview only when modal opens
   useEffect(() => {
     let timer;
     if (pending?.status === 'interview' && activeQuestions.length === 0) {
@@ -74,11 +73,17 @@ export const InterviewModal = () => {
     <div className="fixed inset-0 z-50 bg-zinc-950/90 backdrop-blur-md flex items-center justify-center p-6 font-sans">
       <div className="bg-zinc-900 border-2 border-zinc-800 p-10 rounded-3xl max-w-lg w-full shadow-2xl space-y-8">
         
-        <div className="flex items-center gap-4 border-b border-zinc-800 pb-6">
-          <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center text-xl">👤</div>
-          <div>
-            <h2 className="text-xl font-bold text-zinc-100">{pending.contract.client}</h2>
-            <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.2em] animate-pulse">● {t('interview.connected')}</p>
+        <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center text-xl">👤</div>
+            <div>
+              <h2 className="text-xl font-bold text-zinc-100">{pending.contract.client}</h2>
+              <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.2em] animate-pulse">● {t('interview.connected')}</p>
+            </div>
+          </div>
+          {/* DEV HINT: Menampilkan vibe yang diinginkan klien */}
+          <div className="bg-zinc-800 px-3 py-1 rounded text-[8px] font-black text-zinc-500 uppercase tracking-tighter">
+            Target: {targetVibe}
           </div>
         </div>
 
@@ -108,7 +113,11 @@ export const InterviewModal = () => {
                     <span className="text-zinc-400 group-hover:text-zinc-100">
                       {t('interview.questions.' + currentQ.id + '.options.' + opt.id)}
                     </span>
-                    <span className="text-zinc-800 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">{t('common.select')}</span>
+                    {/* DEV HINT: Menampilkan vibe dari setiap pilihan */}
+                    <span className={"text-[8px] font-black px-2 py-1 rounded transition-all uppercase " + 
+                                     (opt.vibe === targetVibe ? "bg-emerald-500/20 text-emerald-500" : "bg-zinc-900 text-zinc-600")}>
+                      {opt.vibe}
+                    </span>
                   </button>
                 ))}
               </div>

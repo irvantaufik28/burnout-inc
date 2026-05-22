@@ -43,6 +43,44 @@ export const CHAOS_EVENTS = [
     ]
   },
 
+  // --- BEGINNER DOMAIN SPECIFIC (Moderate) ---
+  {
+    id: 'frontend_revision',
+    tier: 2,
+    requirement: { type: 'frontend' },
+    options: [
+      { id: 'fix', effect: { focus: -5, energy: -5, progress: 5 } },
+      { id: 'negotiate', effect: { reputation: -2, reward: 50 } }
+    ]
+  },
+  {
+    id: 'backend_auth_break',
+    tier: 2,
+    requirement: { type: 'backend' },
+    options: [
+      { id: 'debug', effect: { focus: -10, progress: -5 } },
+      { id: 'revert', effect: { progress: -15, focus: -2 } }
+    ]
+  },
+  {
+    id: 'ai_hallucination',
+    tier: 2,
+    requirement: { type: 'ai' },
+    options: [
+      { id: 'retrain', effect: { energy: -10, progress: -10 } },
+      { id: 'ignore', effect: { reputation: -5, quality: -10 } }
+    ]
+  },
+  {
+    id: 'devops_container_fail',
+    tier: 2,
+    requirement: { type: 'devops' },
+    options: [
+      { id: 'restart', effect: { energy: -5, focus: -5 } },
+      { id: 'rebuild', effect: { energy: -15, progress: 10 } }
+    ]
+  },
+
   // --- TIER 3: MAJOR (Crisis Mode) ---
   {
     id: 'production_failure',

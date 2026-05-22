@@ -1,10 +1,12 @@
 import { useGameStore } from '../store/useGameStore';
+import { formatCurrency } from '../utils/currencyFormatter';
 
 export const FreelanceProjectDetailModal = () => {
   const selected = useGameStore((state) => state.selectedContract);
   const clearSelected = useGameStore((state) => state.clearSelectedContract);
   const apply = useGameStore((state) => state.applyForContract);
   const getEfficiency = useGameStore((state) => state.getMatchEfficiency);
+  const language = useGameStore((state) => state.language);
   const t = useGameStore((state) => state.t);
 
   if (!selected) return null;
@@ -52,7 +54,7 @@ export const FreelanceProjectDetailModal = () => {
             <div className="space-y-4">
               <h3 className="text-[10px] uppercase text-zinc-500 font-black tracking-widest">{t('dashboard.requirements')}</h3>
               <div className="flex flex-wrap gap-2">
-                {Object.entries(selected.req).map(([skill, val]) => (
+                {Object.entries(selected.req || {}).map(([skill, val]) => (
                   <div key={skill} className="bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase">{skill}</span>
                     <span className="text-xs font-mono text-zinc-100 font-bold">{val}</span>
@@ -77,7 +79,7 @@ export const FreelanceProjectDetailModal = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[8px] uppercase text-zinc-500 font-bold">Capital</p>
-                  <p className="text-xl font-mono text-emerald-400 font-bold">+${selected.reward}</p>
+                  <p className="text-xl font-mono text-emerald-400 font-bold">+{formatCurrency(selected.reward, language)}</p>
                 </div>
                 <div>
                   <p className="text-[8px] uppercase text-zinc-500 font-bold">Reputation</p>
@@ -91,7 +93,7 @@ export const FreelanceProjectDetailModal = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[8px] uppercase text-zinc-500 font-bold">{t('freelance.penalty')}</p>
-                  <p className="text-lg font-mono text-red-400 font-bold">-${selected.penalty}</p>
+                  <p className="text-lg font-mono text-red-400 font-bold">-{formatCurrency(selected.penalty, language)}</p>
                 </div>
                 <div>
                   <p className="text-[8px] uppercase text-zinc-500 font-bold">Loss</p>

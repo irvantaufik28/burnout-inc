@@ -3,69 +3,36 @@
 ## Project Overview
 Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a struggling indie developer navigating the high-pressure world of gig work, deadlines, and professional reputation.
 
-- Location: /Volumes/Development/burnout-inc
-- Vision: High-stakes, minimalist dashboard sim focusing on the emotional and strategic survival of a freelancer.
-
----
-
-## Tech Stack
-- Framework: React (Vite)
-- State Management: Zustand
-- Styling: TailwindCSS v4 (Vite Plugin)
-- Language: JavaScript
-
----
-
-## Mandatory Development Workflow
-1. Docs First: Always read AGENTS.md and /docs before implementing new features.
-2. Document Every System: No major system exists without a dedicated .md file in /docs.
-3. Localization Rule: Every gameplay system and UI text MUST support English and Indonesian from the start.
-4. Update Progress: Keep the Progress Log below updated for every change.
-
 ---
 
 ## Architecture Decisions
-1. Zustand for Global State: Central store for all game data.
-2. Modular Dashboard: UI is split into specialized panels.
-3. Temporal Loop: Managed via useGameLoop, supports variable speeds.
-4. Task System: Manages recovery and stimulant actions.
-5. Auto-Work System: Projects progress passively based on player vitals (Energy/Focus).
-6. Contract Lifecycle: Strictly enforced state machine (Available -> Active -> Archived).
-7. Visual Deadline: A dynamic time bar that acts as the primary failure indicator.
-8. Project Requirement System: Progress speed depends on skill match efficiency between player and contract.
-9. Client Chaos System: Tiered incident events (Minor, Moderate, Major) with balanced consequences.
-10. Project Condition System: Persistent status effects (Scars) that modify project behavior and difficulty.
-11. Booster System: Unhealthy coping mechanisms (Stimulants) with temporary benefits and delayed aftermaths.
+1. Zustand for Global State.
+2. Dual Time Scale System: Project systems (1h=1s) vs Human systems (4h updates).
+3. Auto-Work System: Passive progress based on vitals.
+4. Career Save System: Permanent persistence using localStorage.
+5. Device Maintenance System: Persistent hardware damage that restricts Max Focus.
+6. Debt Pressure System: Negative balance support with tiered psychological and mechanical penalties.
 
 ---
 
 ## Progress Log
-
-### Phase 1: Foundation (Completed)
-- Initialize project with Vite/React/Tailwind.
-- Implement basic dashboard layout.
-- Initial Zustand store.
-
 ### Phase 2: Freelance Survival Loop (Current)
-- [x] Update Core Documentation (AGENT.md, docs/).
-- [x] Implement Localization System (Bilingual: EN/ID).
-- [x] Refine Freelance Board System (Randomized varied contracts).
-- [x] Implement Waiting Response Flow (Apply -> Delay -> Result).
-- [x] Implement Interview System (Situational personality-driven).
-- [x] Bug Fix: Ensure active contract card disappears upon completion.
-- [x] Implement Visual Deadline Bar (Core failure indicator).
-- [x] Implement Auto-Work System (Passive execution & Recovery management).
-- [x] Implement Project Requirement System (Skill-based efficiency).
-- [x] Implement Client Chaos System (Randomized incident events & decision stakes).
-- [x] Implement Project Condition System (Persistent status effects/scars).
-- [x] Improve Freelance Detail Experience (Company identity, briefs, risk/reward visuals).
-- [x] Chaos Balancing Pass (Implemented tiers, frequency reduction, and condition-first consequences).
-- [x] Implement Booster System (Coping mechanisms with delayed aftermaths).
+- [x] Implement Localization System.
+- [x] Implement Auto-Work System.
+- [x] Implement Multi-Currency Localization.
+- [x] Implement Career EXP & Skill EXP.
+- [x] Implement Level Up Celebration System.
+- [x] Implement Career Save System (Persistence).
+- [x] Implement Weekly Bill & Invoice System.
+- [x] Implement Full Calendar System.
+- [x] Implement Device Damage & Maintenance.
+- [x] Implement Debt Pressure System (Negative Balance).
 
 ---
 
 ## Agent Guidelines
-1. Simple First: Avoid enterprise patterns. Focus on addictive loops.
-2. Docs Mandatory: Update /docs before every major system change.
-3. Dark Minimalist UI: Background zinc-950, borders zinc-800.
-4. Mixed-Language Culture: Translate UI and narrative, keep Tech terms in English.
+1. Simple First: Avoid enterprise patterns.
+2. Docs Mandatory: Update /docs before major changes.
+3. Progression Integrity: Prioritize career identity.
+4. Maintenance Philosophy: Technical problems should create persistent manageable pressure.
+5. Debt Philosophy: Financial failure should create persistent emotional pressure, NOT instant punishment. Support survival tension and risk-taking.
