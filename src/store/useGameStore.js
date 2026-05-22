@@ -75,6 +75,7 @@ export const useGameStore = create((set, get) => ({
       state.handleNewDay()
     }
 
+    // Tick active contract deadline
     if (state.activeContract && state.activeContract.status === 'active') {
       const remaining = state.activeContract.remaining - 1
       if (remaining <= 0 && state.activeContract.progress < 100) {
@@ -84,6 +85,7 @@ export const useGameStore = create((set, get) => ({
       }
     }
 
+    // Tick pending application (Waiting for response flow)
     if (state.pendingApplication && state.pendingApplication.status === 'waiting') {
       const delay = state.pendingApplication.delay - 1
       if (delay <= 0) {
@@ -118,8 +120,6 @@ export const useGameStore = create((set, get) => ({
   },
 
   refreshContractBoard: () => {
-    // Only refresh if NO active contract and NO pending application
-    // This prevents board spamming and ensures focus
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
@@ -239,24 +239,39 @@ export const useGameStore = create((set, get) => ({
       }
       
       let activeContract = state.activeContract
+
+      // Handle Freelance Task Completion
       if (task.type === 'freelance' && activeContract && activeContract.status === 'active') {
-        activeContract = { 
-          ...activeContract, 
-          progress: Math.min(100, activeContract.progress + (20 * efficiency)) 
-        }
+        const newProgress = Math.min(100, activeContract.progress + (20 * efficiency));
         
-        if (activeContract.progress >= 100) {
+        if (newProgress >= 100) {
+          // 1. Give rewards once
           newPlayer.money += activeContract.reward
           newPlayer.reputation += 10
-          state.addLog('SUCCESS: Delivered ' + activeContract.title + '. Paid $' + activeContract.reward + '.');
+          
+          // 2. Mark completed and Archive to portfolio
+          const completedContract = { ...activeContract, progress: 100, status: 'completed', result: 'success' };
+          
+          // 3. Log success
+          const successMsg = 'SUCCESS: Delivered ' + activeContract.title + '. Paid $' + activeContract.reward + '.';
+          
           return { 
             player: newPlayer, 
-            activeContract: null, 
-            portfolio: [...state.portfolio, { ...activeContract, status: 'completed', result: 'success' }] 
+            activeContract: null, // Clear active contract immediately
+            currentTask: null, // Ensure task is cleared
+            portfolio: [...state.portfolio, completedContract],
+            logs: [successMsg, ...state.logs].slice(0, 50) // Update logs within same slice
           }
+        } else {
+            // Update progress if not yet 100%
+            return { 
+                player: newPlayer, 
+                activeContract: { ...activeContract, progress: newProgress } 
+            }
         }
       }
 
+      // Handle Rest Task
       if (task.type === 'rest') {
         newPlayer.energy = Math.min(100, newPlayer.energy + 40)
         newPlayer.focus = Math.min(100, newPlayer.focus + 25)
@@ -264,7 +279,11 @@ export const useGameStore = create((set, get) => ({
 
       return { player: newPlayer, activeContract }
     })
-    state.addLog('Finished: ' + task.name)
+
+    // Log general task finish if not handled above
+    if (task.type !== 'freelance' || (state.activeContract && state.activeContract.progress < 100)) {
+        state.addLog('Finished: ' + task.name)
+    }
   },
 
   checkLosingConditions: () => {

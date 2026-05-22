@@ -53,8 +53,8 @@ export const ActionPanel = () => {
           <StatusOverlay t={t} message={t('freelance.interviewing')} />
         )}
 
-        {/* State: Active Contract */}
-        {activeContract && (
+        {/* State: Active Contract - Only render if active */}
+        {activeContract?.status === 'active' && (
           <div className="bg-emerald-950/10 border border-emerald-500/20 p-5 rounded-xl space-y-4">
             <div>
               <p className="text-emerald-500 text-[9px] font-bold uppercase tracking-widest mb-1">{t('freelance.activeContract')}</p>
@@ -78,9 +78,9 @@ export const ActionPanel = () => {
                 energyCost: 15, 
                 reward: activeContract.reward 
               })}
-              disabled={Boolean(currentTask)}
+              disabled={Boolean(currentTask) || activeContract.status !== 'active'}
               className={"w-full py-3 rounded-lg font-bold text-xs transition-all " + 
-                         (currentTask ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 active:scale-95")}
+                         (currentTask || activeContract.status !== 'active' ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 active:scale-95")}
             >
               {t('freelance.executeWork')}
             </button>
