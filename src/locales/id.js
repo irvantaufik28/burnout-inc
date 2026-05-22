@@ -14,6 +14,8 @@ export const id = {
     select: "Pilih",
     risk: "Risiko",
     deadline: "Deadline",
+    status: "Status",
+    progress: "Progres",
   },
   dashboard: {
     title: "BURNOUT INC.",
@@ -45,6 +47,19 @@ export const id = {
     deadlineCritical: "DEADLINE KRITIS",
     projectFailed: "PROYEK GAGAL",
     delayFeedback: "Klien kecewa dengan keterlambatan pengiriman.",
+    working: "Bekerja...",
+    exhausted: "Kelelahan",
+    pacing: "Menjaga ritme...",
+  },
+  actions: {
+    takeNap: "Tidur Sejenak",
+    takeNapDesc: "4 jam tidur ringan untuk memulihkan Energi",
+    drinkCoffee: "Minum Kopi",
+    drinkCoffeeDesc: "Tambah Energi instan, Fokus turun nanti",
+    takeBreak: "Istirahat Sejenak",
+    takeBreakDesc: "2 jam istirahat untuk memulihkan Fokus",
+    allNighter: "Lembur Semalam",
+    allNighterDesc: "8 jam kerja keras, penalti berat besok",
   },
   interview: {
     title: "Wawancara Langsung",

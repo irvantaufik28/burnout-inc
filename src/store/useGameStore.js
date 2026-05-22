@@ -82,6 +82,8 @@ export const useGameStore = create((set, get) => ({
       } else {
         set((s) => ({ activeContract: { ...s.activeContract, remaining } }))
       }
+
+      state.tickAutoWork()
     }
 
     if (state.pendingApplication && state.pendingApplication.status === 'waiting') {
@@ -101,15 +103,42 @@ export const useGameStore = create((set, get) => ({
     state.checkLosingConditions()
   },
 
+  tickAutoWork: () => {
+    const state = get()
+    const { player, activeContract } = state
+    
+    if (player.energy <= 0) return
+
+    const energyMult = player.energy > 20 ? 1 : 0.3
+    const focusMult = player.focus / 100
+    const progressGain = 4 * energyMult * focusMult
+    const energyCost = 2 * (1 / energyMult) 
+    const focusCost = 1.5
+
+    const newProgress = Math.min(100, activeContract.progress + progressGain)
+
+    if (newProgress >= 100) {
+      state.handleContractSuccess()
+    } else {
+      set((s) => ({
+        player: {
+          ...s.player,
+          energy: Math.max(0, s.player.energy - energyCost),
+          focus: Math.max(0, s.player.focus - focusCost)
+        },
+        activeContract: { ...s.activeContract, progress: newProgress }
+      }))
+    }
+  },
+
   handleNewDay: () => {
     const state = get()
     const expenses = 40 
     
-    set((state) => ({
+    set((s) => ({
       player: {
-        ...state.player,
-        money: state.player.money - expenses,
-        energy: Math.min(100, state.player.energy + 25),
+        ...s.player,
+        money: s.player.money - expenses,
       }
     }))
 
@@ -140,6 +169,7 @@ export const useGameStore = create((set, get) => ({
         client,
         status: 'available',
         risk: archetype.risk,
+        progress: 0,
         req: { [archetype.tech]: archetype.tier === 'Easy' ? 0 : archetype.tier === 'Medium' ? 10 : 25 }
       }
     }
@@ -164,9 +194,8 @@ export const useGameStore = create((set, get) => ({
 
   resolveContractApplication: () => {
     const state = get()
-    const { contract } = state.pendingApplication
     set({ pendingApplication: { ...state.pendingApplication, status: 'interview' } })
-    state.addLog('Update: ' + contract.client + ' requested an interview.');
+    state.addLog('Update: ' + state.pendingApplication.contract.client + ' requested an interview.');
   },
 
   acceptContract: (contract) => {
@@ -179,6 +208,24 @@ export const useGameStore = create((set, get) => ({
   },
 
   rejectPending: () => set({ pendingApplication: null }),
+
+  handleContractSuccess: () => {
+    const state = get()
+    const contract = state.activeContract
+    const completedContract = { ...contract, progress: 100, status: 'completed', result: 'success' };
+    const successMsg = state.t('freelance.success').replace('{title}', contract.title).replace('${reward}', contract.reward);
+
+    set((s) => ({
+      player: { 
+        ...s.player, 
+        money: s.player.money + contract.reward,
+        reputation: s.player.reputation + 10 
+      },
+      activeContract: null,
+      portfolio: [...s.portfolio, completedContract],
+      logs: [successMsg, ...s.logs].slice(0, 50)
+    }))
+  },
 
   handleContractFailure: () => {
     const state = get()
@@ -198,13 +245,6 @@ export const useGameStore = create((set, get) => ({
     const state = get()
     if (state.currentTask) return
     
-    if (task.type === 'freelance') {
-        if (!state.activeContract || state.activeContract.status !== 'active') {
-            state.addLog('Error: No active contract.');
-            return;
-        }
-    }
-
     if (state.player.energy < (task.energyCost || 0)) {
       state.addLog('Critical: Insufficient Energy.');
       return
@@ -229,52 +269,27 @@ export const useGameStore = create((set, get) => ({
 
   completeTask: (task) => {
     const state = get()
-    const efficiency = state.player.focus / 100
     
     set((s) => {
       const newPlayer = { 
         ...s.player, 
         energy: Math.max(0, s.player.energy - (task.energyCost || 0)),
-        focus: Math.max(0, s.player.focus - 5)
       }
       
-      let currentActive = s.activeContract
-
-      if (task.type === 'freelance' && currentActive && currentActive.status === 'active') {
-        const newProgress = Math.min(100, currentActive.progress + (25 * efficiency));
-        
-        if (newProgress >= 100) {
-          const completedContract = { ...currentActive, progress: 100, status: 'completed', result: 'success' };
-          newPlayer.money += currentActive.reward
-          newPlayer.reputation += 10
-          const successMsg = state.t('freelance.success').replace('{title}', currentActive.title).replace('${reward}', currentActive.reward);
-          
-          return { 
-            player: newPlayer, 
-            activeContract: null, 
-            currentTask: null,
-            portfolio: [...s.portfolio, completedContract],
-            logs: [successMsg, ...s.logs].slice(0, 50)
-          }
-        } else {
-            return { 
-                player: newPlayer, 
-                activeContract: { ...currentActive, progress: newProgress } 
-            }
-        }
-      }
-
       if (task.type === 'rest') {
         newPlayer.energy = Math.min(100, newPlayer.energy + 40)
-        newPlayer.focus = Math.min(100, newPlayer.focus + 25)
+        newPlayer.focus = Math.min(100, newPlayer.focus + 30)
+      }
+
+      if (task.type === 'coffee') {
+        newPlayer.energy = Math.min(100, newPlayer.energy + 25)
+        newPlayer.focus = Math.max(0, newPlayer.focus - 10)
       }
 
       return { player: newPlayer }
     })
 
-    if (task.type !== 'freelance' || (get().activeContract && get().activeContract.progress < 100)) {
-        get().addLog('Finished: ' + task.name)
-    }
+    state.addLog('Finished: ' + task.name)
   },
 
   checkLosingConditions: () => {

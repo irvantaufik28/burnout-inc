@@ -27,9 +27,11 @@ export const ActionPanel = () => {
     if (availableContracts.length === 0) refreshBoard();
   }, [availableContracts.length, refreshBoard]);
 
-  const deadlinePercentage = activeContract ? Math.round((activeContract.remaining / activeContract.deadline) * 100) : 0;
-  const isCritical = deadlinePercentage < 20;
-  const deadlineColor = deadlinePercentage > 50 ? "bg-emerald-500" : deadlinePercentage > 20 ? "bg-yellow-500" : "bg-red-500";
+  const recoveryActions = [
+    { id: 'nap', name: t('actions.takeNap'), desc: t('actions.takeNapDesc'), config: { type: 'rest', name: t('actions.takeNap'), duration: 4, energyCost: 0 } },
+    { id: 'coffee', name: t('actions.drinkCoffee'), desc: t('actions.drinkCoffeeDesc'), config: { type: 'coffee', name: t('actions.drinkCoffee'), duration: 0, energyCost: 0 } },
+    { id: 'break', name: t('actions.takeBreak'), desc: t('actions.takeBreakDesc'), config: { type: 'rest', name: t('actions.takeBreak'), duration: 2, energyCost: 0 } },
+  ];
 
   return (
     <section className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl h-full flex flex-col">
@@ -57,61 +59,22 @@ export const ActionPanel = () => {
           <StatusOverlay t={t} message={t('freelance.interviewing')} />
         )}
 
-        {/* State: Active Contract - Refined with Deadline Bar */}
+        {/* State: Active Contract (Work is Auto, show recovery actions) */}
         {activeContract?.status === 'active' && (
-          <div className={"border p-5 rounded-xl space-y-5 transition-all " + (isCritical ? "bg-red-950/10 border-red-500/30 animate-pulse-slow" : "bg-emerald-950/10 border-emerald-500/20")}>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className={"text-[9px] font-bold uppercase tracking-widest mb-1 " + (isCritical ? "text-red-500" : "text-emerald-500")}>
-                  {isCritical ? t('freelance.deadlineCritical') : t('freelance.activeContract')}
-                </p>
-                <h3 className="text-zinc-100 font-bold text-lg">{activeContract.title}</h3>
-              </div>
-              <div className="text-right">
-                <p className="text-zinc-600 text-[8px] uppercase font-bold">{t('common.risk')}</p>
-                <p className="text-zinc-400 text-xs font-mono">{activeContract.risk}</p>
-              </div>
-            </div>
-
-            {/* DEADLINE BAR - Core Failure Indicator */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-[9px] uppercase tracking-tighter text-zinc-500 font-bold">
-                <span>{t('common.deadline')}</span>
-                <span className={isCritical ? "text-red-500" : ""}>{activeContract.remaining + "h remaining"}</span>
-              </div>
-              <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                <div 
-                  className={"h-full transition-all duration-1000 " + deadlineColor} 
-                  style={{ width: deadlinePercentage + "%" }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/50 pt-3">
-              <div>
-                <p className="text-zinc-600 text-[8px] uppercase font-bold">Client</p>
-                <p className="text-zinc-400 text-xs truncate">{activeContract.client}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-zinc-600 text-[8px] uppercase font-bold">Reward</p>
-                <p className="text-emerald-500 text-sm font-mono font-bold">{"$" + activeContract.reward}</p>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => startTask({ 
-                type: 'freelance', 
-                name: 'Working on ' + activeContract.title, 
-                duration: 4, 
-                energyCost: 15, 
-                reward: activeContract.reward 
-              })}
-              disabled={Boolean(currentTask) || activeContract.status !== 'active'}
-              className={"w-full py-3 rounded-lg font-bold text-xs transition-all " + 
-                         (currentTask || activeContract.status !== 'active' ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 active:scale-95")}
-            >
-              {t('freelance.executeWork')}
-            </button>
+          <div className="space-y-3">
+            <p className="text-[9px] uppercase text-zinc-600 font-black tracking-widest px-1">Management Actions</p>
+            {recoveryActions.map(action => (
+              <button 
+                key={action.id}
+                onClick={() => startTask(action.config)}
+                disabled={Boolean(currentTask)}
+                className={"w-full bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-left transition-all " + 
+                           (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:border-zinc-600 active:scale-[0.98]")}
+              >
+                <div className="font-bold text-zinc-100 text-sm">{action.name}</div>
+                <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{action.desc}</div>
+              </button>
+            ))}
           </div>
         )}
 
@@ -140,17 +103,19 @@ export const ActionPanel = () => {
           );
         })}
 
-        <div className="mt-auto pt-4 border-t border-zinc-800/50">
-          <button 
-            onClick={() => startTask({ type: 'rest', name: 'Deep Sleep', duration: 6, energyCost: 0 })}
-            disabled={Boolean(currentTask)}
-            className={"w-full bg-zinc-800 border border-zinc-700 p-4 rounded-xl text-left transition-all " + 
-                       (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:bg-zinc-700 active:scale-95")}
-          >
-            <div className="font-bold text-zinc-100 text-sm">{t('dashboard.systemRecovery')}</div>
-            <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{t('dashboard.restDesc')}</div>
-          </button>
-        </div>
+        {!activeContract && !pending && (
+          <div className="mt-auto pt-4 border-t border-zinc-800/50">
+             <button 
+              onClick={() => startTask({ type: 'rest', name: 'Deep Sleep', duration: 6, energyCost: 0 })}
+              disabled={Boolean(currentTask)}
+              className={"w-full bg-zinc-800 border border-zinc-700 p-4 rounded-xl text-left transition-all " + 
+                         (currentTask ? "opacity-40 grayscale cursor-not-allowed" : "hover:bg-zinc-700 active:scale-95")}
+            >
+              <div className="font-bold text-zinc-100 text-sm">{t('dashboard.systemRecovery')}</div>
+              <div className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{t('dashboard.restDesc')}</div>
+            </button>
+          </div>
+        )}
 
       </div>
     </section>

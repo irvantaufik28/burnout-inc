@@ -14,6 +14,8 @@ export const en = {
     select: "Select",
     risk: "Risk",
     deadline: "Deadline",
+    status: "Status",
+    progress: "Progress",
   },
   dashboard: {
     title: "BURNOUT INC.",
@@ -45,6 +47,19 @@ export const en = {
     deadlineCritical: "DEADLINE CRITICAL",
     projectFailed: "PROJECT FAILED",
     delayFeedback: "Client disappointed with delivery delay.",
+    working: "Working...",
+    exhausted: "Exhausted",
+    pacing: "Pacing...",
+  },
+  actions: {
+    takeNap: "Take Nap",
+    takeNapDesc: "4h light sleep to restore Energy",
+    drinkCoffee: "Drink Coffee",
+    drinkCoffeeDesc: "Instant Energy boost, Focus penalty later",
+    takeBreak: "Take Quick Break",
+    takeBreakDesc: "2h break to restore Focus",
+    allNighter: "Pull All Nighter",
+    allNighterDesc: "8h heavy grind, severe tomorrow penalty",
   },
   interview: {
     title: "Live Interview",

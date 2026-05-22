@@ -1,17 +1,20 @@
-# Task Duration System
+# Task and Action System
 
 ## System Identity
-The core mechanical constraint of Burnout Inc. Instead of immediate actions, every significant player choice consumes game time.
+Controls what the player is currently doing. In Phase 2, this has shifted from manual project work to Management and Recovery Actions.
 
-## Gameplay Effects
-- Sequential Execution: Only one task can be active at a time.
-- Resource Drain: Tasks consume Energy and Focus over time.
-- Decision Stakes: Choosing a long task (e.g., 8h Freelance) means you cannot build your product during that window.
+## Sequential Execution
+Only one task can be active at a time (e.g., you cannot take a nap while also drinking coffee).
 
-## Execution & Cleanup (Bug Fix Applied)
-- Freelance tasks require a contract with status active.
-- Upon 100 percent progress, the task system and active contract are cleared atomically.
-- This prevents stale UI references where a button remains clickable after a project is done.
+## Action Types
+- Take Nap (4h): High Energy recovery, zero Focus recovery. Consumes time.
+- Take Quick Break (2h): High Focus recovery, small Energy recovery. Consumes time.
+- Drink Coffee (Instant): Instant Energy boost, but creates a Focus penalty later.
+- Deep Sleep (6h): Max recovery for both Energy and Focus. Usually done when no contract is active.
+
+## Execution Rules
+- Players no longer manually "Work". Instead, they select recovery actions to keep the Auto Work System running efficiently.
+- Task completion triggers logic based on the action type (e.g., adding Energy/Focus).
 
 ## Architecture Notes
-Tasks are stored in currentTask within useGameStore.js. The tickTime system decrements remainingTime until zero, then triggers completeTask.
+Tasks use the standard currentTask state. The game loop ticks these down until completion.

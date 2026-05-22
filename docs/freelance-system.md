@@ -1,29 +1,21 @@
-# Freelance Board & Contract System
+# Freelance Board and Contract System
 
 ## Gameplay Philosophy
-The primary source of income and pressure. The system mimics the hustle of real-world freelance platforms (Upwork, etc.) but within a high-stakes simulation environment. 
+The primary source of income and pressure. In Phase 2, this has evolved into an Auto-Progressing Simulation.
 
-## Contract Lifecycle & Status
-To prevent exploits and ensure UI synchronization, contracts follow a strict state machine:
+## Contract Lifecycle
+1. Available: Board contracts with tiered difficulty.
+2. Active: Once accepted, the project automatically progresses every game tick.
+3. Completed/Failed: Based on progress reached before the deadline hits zero.
 
-1. **Available:** Contract is on the board. Player can view requirements and apply.
-2. **Interview:** Application sent, waiting for client response or quiz mini-game.
-3. **Active:** Contract accepted. Deadline is ticking. Work tasks can be executed.
-4. **Completed:** Progress reached 100%. Rewards given, reputation increased, archived to Portfolio.
-5. **Failed:** Deadline hit zero or project abandoned. Reputation penalty applied, archived to Portfolio as fail.
-6. **Archived:** Contract moved to Portfolio history. Non-executable.
+## Auto-Work Logic
+- Passive Progress: Progress is generated every game hour.
+- Vitals Dependency: High Energy and Focus = fast progress. Low Energy = massive slowdown.
+- Failure: If the Deadline Bar hits 0 before progress hits 100 percent, the project is failed.
 
-## Deadline Bar (Core Failure Indicator)
-The Deadline Bar is the primary visual representation of project urgency:
-- **Safe (>50%):** Emerald bar.
-- **Warning (20-50%):** Yellow bar.
-- **Critical (<20%):** Red bar with pulse animation and "DEADLINE CRITICAL" status.
-- **Automatic Failure:** If the bar reaches 0 percent, the project is instantly failed, cleared from the active slot, and a reputation penalty is applied.
+## Strategic Pressure
+The player is no longer a "Clicker". They are a "Manager". You must decide when to push through a deadline (exhausting yourself) or when to take a break (risking the deadline).
 
-## UI Synchronization Rules
-- The **Active Contract Card** must ONLY render if activeContract.status === "active".
-- Upon reaching 100% progress or failing, the activeContract state must be explicitly set to null to clear the UI immediately.
-
-## Anti-Exploit Protections
-- **One Active Project:** Only one contract can be in the active state at a time.
-- **Atomic Cleanup:** Rewards, portfolio archiving, and activeContract clearing must happen in a single state mutation.
+## Architecture Decisions
+- Progress and Deadline are ticked within the central tickTime action.
+- UI uses defensive conditions to hide/show active contract details.
