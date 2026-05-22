@@ -34,7 +34,7 @@ const INITIAL_STATE = {
   isGameOver: false,
   gameOverReason: '',
 
-  activeChaosEvent: null // { id, contract, options }
+  activeChaosEvent: null
 }
 
 export const useGameStore = create((set, get) => ({
@@ -65,7 +65,6 @@ export const useGameStore = create((set, get) => ({
 
   restartGame: () => set(INITIAL_STATE),
 
-  // --- UTILS ---
   getMatchEfficiency: (contract) => {
     const state = get()
     if (!contract || !contract.req) return 1
@@ -87,7 +86,6 @@ export const useGameStore = create((set, get) => ({
     return totalRatio / requirements.length
   },
 
-  // --- CORE TICK ---
   tickTime: () => {
     const state = get()
     if (state.isGameOver || state.activeChaosEvent) return
@@ -111,7 +109,6 @@ export const useGameStore = create((set, get) => ({
 
       state.tickAutoWork()
 
-      // Random Chaos Event Trigger (10% per hour)
       if (Math.random() < 0.1) {
         state.triggerChaosEvent()
       }
@@ -139,13 +136,12 @@ export const useGameStore = create((set, get) => ({
     const p = state.activeContract
     if (!p) return
 
-    // Find applicable events based on archetype
     const possibleEvents = CHAOS_EVENTS.filter(e => !e.archetype || e.archetype === p.client);
     if (possibleEvents.length === 0) return
 
     const event = possibleEvents[Math.floor(Math.random() * possibleEvents.length)]
     set({ activeChaosEvent: event })
-    get().togglePause() // Auto pause for decisions
+    get().togglePause() 
   },
 
   resolveChaosEvent: (optionId) => {
@@ -181,7 +177,7 @@ export const useGameStore = create((set, get) => ({
         activeContract: newActiveContract, 
         techStack: newTechStack,
         activeChaosEvent: null,
-        gameTime: { ...s.gameTime, isPaused: false } // Resume
+        gameTime: { ...s.gameTime, isPaused: false }
       }
     })
 
@@ -236,9 +232,30 @@ export const useGameStore = create((set, get) => ({
     if (get().activeContract || get().pendingApplication) return;
 
     const archetypes = [
-      { tier: 'Easy', clients: ['Indie Creator', 'Local Shop'], rewardRange: [100, 200], deadlineRange: [24, 48], tech: 'frontend', risk: 'Low' },
-      { tier: 'Medium', clients: ['Startup Founder', 'Agency'], rewardRange: [300, 600], deadlineRange: [48, 96], tech: 'backend', risk: 'Medium' },
-      { tier: 'Hard', clients: ['Tech Startup', 'AI Startup'], rewardRange: [800, 1500], deadlineRange: [72, 144], tech: 'ai', risk: 'High' }
+      { 
+        tier: 'Easy', 
+        clients: ['Indie Creator', 'Local Shop'], 
+        rewardRange: [100, 200], 
+        deadlineRange: [24, 48], 
+        req: { frontend: 4, design: 4 }, 
+        risk: 'Low' 
+      },
+      { 
+        tier: 'Medium', 
+        clients: ['Startup Founder', 'Agency'], 
+        rewardRange: [300, 600], 
+        deadlineRange: [48, 96], 
+        req: { backend: 12, coding: 8 }, 
+        risk: 'Medium' 
+      },
+      { 
+        tier: 'Hard', 
+        clients: ['Tech Startup', 'AI Startup'], 
+        rewardRange: [800, 1500], 
+        deadlineRange: [72, 144], 
+        req: { ai: 15, backend: 10, coding: 12 }, 
+        risk: 'High' 
+      }
     ];
 
     const generateContract = (archetype, index) => {
@@ -247,7 +264,7 @@ export const useGameStore = create((set, get) => ({
       const client = archetype.clients[Math.floor(Math.random() * archetype.clients.length)];
       return {
         id: 'c-' + Date.now() + '-' + index,
-        title: archetype.tier + ' ' + (archetype.tech === 'ai' ? 'AI System' : archetype.tech === 'backend' ? 'API Server' : 'Web UI'),
+        title: archetype.tier + ' ' + (archetype.req.ai ? 'AI System' : archetype.req.backend ? 'API Server' : 'Web UI'),
         difficulty: archetype.tier,
         reward,
         deadline,

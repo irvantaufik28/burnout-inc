@@ -81,7 +81,7 @@ export const ActionPanel = () => {
               </div>
               
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 mb-3">
-                 {Object.entries(contract.req).map(([skill, val]) => (
+                 {Object.entries(contract.req || {}).map(([skill, val]) => (
                    <span key={skill} className="text-[8px] uppercase font-bold text-zinc-600">
                      {skill + " " + val}
                    </span>
