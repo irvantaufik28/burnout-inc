@@ -34,7 +34,7 @@ export const ActionPanel = () => {
             return (
               <button
                 key={act.id}
-                disabled={currentTask !== null || isOnCooldown}
+                disabled={!!currentTask || isOnCooldown}
                 onClick={() => startTask(act)}
                 className={"w-full text-left p-5 rounded-2xl border transition-all flex items-center justify-between group relative overflow-hidden " + 
                            (currentTask || isOnCooldown ? "bg-zinc-900/30 border-zinc-800/50 opacity-40" : "bg-zinc-950/50 border-zinc-800 hover:border-zinc-600 active:scale-95")}

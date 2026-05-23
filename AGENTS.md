@@ -1,38 +1,31 @@
 # Burnout Inc. | Project Source of Truth
 
-## Project Overview
-Burnout Inc. is a Freelancer Survival Simulation. The player takes the role of a struggling indie developer navigating the high-pressure world of gig work, deadlines, and professional reputation.
-
----
-
 ## Architecture Decisions
 1. Zustand for Global State.
-2. Dual Time Scale System: Project systems (1h=1s) vs Human systems (4h updates).
-3. Auto-Work System: Passive progress based on vitals.
+2. Dual Time Scale System: Project vs Human pacing.
+3. Event Queue Manager: Handles prioritized serialization of major popups.
 4. Career Save System: Permanent persistence using localStorage.
-5. Device Maintenance System: Persistent hardware damage that restricts Max Focus.
-6. Debt Pressure System: Negative balance support with tiered psychological and mechanical penalties.
+5. Debt Pressure System: Negative balance support with tiered penalties.
+6. Post-Load Recovery: Ensures active project loops and MODAL states resume correctly after rehydration.
 
 ---
 
 ## Progress Log
 ### Phase 2: Freelance Survival Loop (Current)
-- [x] Implement Localization System.
-- [x] Implement Auto-Work System.
-- [x] Implement Multi-Currency Localization.
-- [x] Implement Career EXP & Skill EXP.
-- [x] Implement Level Up Celebration System.
-- [x] Implement Career Save System (Persistence).
-- [x] Implement Weekly Bill & Invoice System.
-- [x] Implement Full Calendar System.
-- [x] Implement Device Damage & Maintenance.
-- [x] Implement Debt Pressure System (Negative Balance).
+- [x] Implement Localization System (EN/ID).
+- [x] Implement Auto-Work & Requirement System.
+- [x] Implement Career Save System & Recovery.
+- [x] Implement Weekly Bill & Calendar System.
+- [x] Implement Device Maintenance & Debt Pressure.
+- [x] Implement Event Queue Manager.
+- [x] Implement Overall Survival Status & UI Polish.
+- [x] Bugfix: Absolute integrity fix for store functions and event persistence.
 
 ---
 
 ## Agent Guidelines
-1. Simple First: Avoid enterprise patterns.
-2. Docs Mandatory: Update /docs before major changes.
-3. Progression Integrity: Prioritize career identity.
-4. Maintenance Philosophy: Technical problems should create persistent manageable pressure.
-5. Debt Philosophy: Financial failure should create persistent emotional pressure, NOT instant punishment. Support survival tension and risk-taking.
+5. **Operational Protocol Rule**: Stimulant and recovery systems must always remain responsive, visible, and emotionally satisfying. They must provide immediate gameplay feedback, clear state changes, and visible productivity impact. These are core survival mechanics, NOT cosmetic interactions.
+1. **Simple First**: Avoid enterprise patterns.
+2. **Docs Mandatory**: Update /docs before major changes.
+3. **Recovery Rule**: Persistent gameplay systems must correctly recover after save hydration. **Crucial**: Active modal data (Chaos/Review/Bills) MUST be partialized to prevent reload soft-locks.
+4. **Action Integrity**: When refactoring useGameStore.js, never remove actions used by the UI. Verify dependencies in StatPanel, FreelanceBoard, and TaskPanel before deletion.

@@ -133,6 +133,64 @@ export const id = {
     energyDrink: "Minuman Energi",
     energyDrinkDesc: "Kecepatan agresif, Risiko insomnia",
   },
+  interview: {
+    title: "Wawancara Langsung",
+    connected: "Terhubung (VoIP)",
+    evaluating: "Mengevaluasi Kecocokan...",
+    scenario: "Skenario",
+    failMsg: "Wawancara Gagal: Klien memilih orang lain.",
+    successMsg: "Wawancara Berhasil: Klien terkesan denganmu.",
+    culturalFitFail: "Klien merasa Anda tidak cocok secara budaya.",
+    questions: {
+      startup_deadline: {
+        question: "Kami butuh MVP besok pagi. Sanggup?",
+        options: {
+          a: "Grind tiada henti. Saya kerjakan.",
+          b: "Saya perlu meninjau risiko scope-nya.",
+          c: "Jika kita sederhanakan fiturnya, mungkin saja."
+        }
+      },
+      ai_hype: {
+        question: "Bagaimana jika kita tambahkan label 'AI-powered' di copy marketing kita?",
+        options: {
+          a: "Disruptif. Ayo otomasi semuanya.",
+          b: "Tapi apakah benar menggunakan AI?",
+          c: "Boleh, jika itu membantu brand kita."
+        }
+      },
+      no_budget: {
+        question: "Kami belum punya budget sekarang, tapi kami punya 'passion' yang besar.",
+        options: {
+          a: "Passion tidak bisa membayar tagihan kopi saya.",
+          b: "Saya suka visinya. Saya fleksibel.",
+          c: "Ayo buat demo viral dan cari VC."
+        }
+      },
+      server_crash: {
+        question: "Server crash. Apa prioritas utama Anda?",
+        options: {
+          a: "Posting tweet keren bahwa kita sedang 'scaling'.",
+          b: "Ikuti protokol pemulihan darurat.",
+          c: "Perbaiki secepatnya, dokumentasi belakangan."
+        }
+      },
+      scope_creep: {
+        question: "Bisakah kita tambahkan dukungan mobile juga hari Jumat nanti?",
+        options: {
+          a: "Tidak masalah, kopi menyelesaikan segalanya.",
+          b: "Kita butuh formulir permintaan perubahan resmi.",
+          c: "Mari kita lihat apa yang bisa kita masukkan."
+        }
+      }
+    },
+    feedback: {
+      aggressive: "Klien menyukai energi startup Anda.",
+      stable: "Klien terkesan dengan profesionalisme Anda.",
+      flexible: "Klien menghargai empati Anda.",
+      hype: "Klien bersemangat dengan visi otomasi Anda.",
+      neutral: "Klien merasa vibe Anda kurang cocok."
+    }
+  },
   chaos: {
     title: "Insiden Proyek",
     urgent: "URGENT",
@@ -182,7 +240,7 @@ export const id = {
     },
     angry_escalation: {
       title: "DM Klien Marah",
-      desc: "Klien sangat marah soal keterlambatan terbaru dan mengancam akan membatalkan kontrak.",
+      desc: "Klien sangat marah soal keterlambatan terbaru dan mengancam akan membahayakan kontrak.",
       options: {
         apologize: "Minta maaf dan kerja lembur",
         fire_client: "Pecat klien (Penalti Berat)"
@@ -261,16 +319,34 @@ export const id = {
     title: "Kejadian Hidup",
     urgent: "PENGELUARAN MENDADAK",
     broken_keyboard: {
-        replace: "Ganti Baru (Mahal)",
-        ignore: "Abaikan Dulu (Risiko)"
+        replace: "Ganti Keyboard",
+        ignore: "Abaikan Dulu"
+    },
+    laptop_fan: {
+        repair: "Servis Kipas",
+        ignore: "Terus Kerja"
     },
     laptop_battery: {
-        repair: "Servis Baterai (Aman)",
-        ignore: "Terus Kerja (Risiko Tinggi)"
+        repair: "Servis Baterai",
+        ignore: "Terus Kerja"
     },
     internet_outage: {
         tethering: "Gunakan Data Seluler",
         cafe: "Kerja di Kafe"
+    },
+    mouse_sensor: {
+        replace: "Ganti Mouse",
+        ignore: "Abaikan Dulu"
     }
+  },
+  maintenance: {
+    title: "Perawatan Tertunda",
+    focusCap: "Batas Fokus",
+    repairNow: "Perbaiki Sekarang",
+    insufficientFunds: "Modal Tidak Cukup",
+    restricted: "Kapasitas Fokus Terbatas",
+    incidentLogged: "Insiden Hidup Tercatat",
+    economicDeduction: "Pemotongan Ekonomi",
+    pendingIssue: "Masalah Tertunda",
   }
 };

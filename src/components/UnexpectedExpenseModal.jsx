@@ -45,18 +45,43 @@ export const UnexpectedExpenseModal = () => {
                         </span>
                     </div>
                     
-                    {/* DEV Hint */}
                     <div className="flex gap-1 mt-2">
                         {opt.isPending && meta && (
                             <span className="text-[7px] font-black bg-zinc-900 text-orange-500 px-1 py-0.5 rounded uppercase border border-orange-500/20">
-                                PENDING_ISSUE // FOCUS_CAP:-{meta.baseFocusPenalty}%
+                                {t('maintenance.pendingIssue')} // {t('maintenance.focusCap')}:-{meta.baseFocusPenalty}%
                             </span>
                         )}
-                        {Object.entries(opt.effect || {}).map(([key, val]) => (
-                            <span key={key} className="text-[7px] font-black bg-zinc-900 text-zinc-600 px-1 py-0.5 rounded uppercase border border-zinc-800">
-                                {key}:{val > 0 ? "+" : ""}{val}
-                            </span>
-                        ))}
+                        {Object.entries(opt.effect || {}).map(([key, val]) => {
+                          let label = key;
+                          let valueStr = (val > 0 ? '+' : '') + val;
+                          let color = 'text-zinc-500';
+
+                          if (key === 'focus') label = t('common.focus');
+                          if (key === 'energy') label = t('common.energy');
+                          if (key === 'reputation') label = t('common.reputation');
+                          if (key === 'money' || key === 'reward') {
+                             label = t('common.capital');
+                             color = val > 0 ? 'text-emerald-500' : 'text-red-500';
+                          }
+                          if (key === 'progress') label = t('common.progress');
+                          
+                          if (key === 'addCondition') {
+                             label = '+ ' + t('condition.' + val);
+                             valueStr = '';
+                             color = 'text-orange-500';
+                          }
+                          if (key === 'removeCondition') {
+                             label = '- ' + t('condition.' + val);
+                             valueStr = '';
+                             color = 'text-emerald-500';
+                          }
+
+                          return (
+                              <span key={key} className={'text-[7px] font-black bg-zinc-900 px-1.5 py-0.5 rounded uppercase border border-zinc-800 ' + color}>
+                                  {label}{valueStr ? ':' + valueStr : ''}
+                              </span>
+                          );
+                      })}
                     </div>
                 </button>
              );
@@ -64,7 +89,7 @@ export const UnexpectedExpenseModal = () => {
         </div>
 
         <div className="text-[9px] text-zinc-700 uppercase font-black tracking-[0.3em] text-center pt-4">
-          Life_Incident_Logged // Economic_Deduction
+          {t('maintenance.incidentLogged')} // {t('maintenance.economicDeduction')}
         </div>
       </div>
     </div>

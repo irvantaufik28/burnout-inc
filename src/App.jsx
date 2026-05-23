@@ -6,13 +6,8 @@ import { TechPanel } from './components/TechPanel';
 import { TaskPanel } from './components/TaskPanel';
 import { ActionPanel } from './components/ActionPanel';
 import { LogPanel } from './components/LogPanel';
-import { InterviewModal } from './components/InterviewModal';
-import { ChaosEventModal } from './components/ChaosEventModal';
+import { ModalManager } from './components/ModalManager';
 import { FreelanceProjectDetailModal } from './components/FreelanceProjectDetailModal';
-import { LevelUpModal } from './components/LevelUpModal';
-import { ClientReviewModal } from './components/ClientReviewModal';
-import { UnexpectedExpenseModal } from './components/UnexpectedExpenseModal';
-import { PaymentModal } from './components/PaymentModal';
 import { MentalAura } from './components/MentalAura';
 
 function App() {
@@ -122,13 +117,8 @@ function App() {
         </div>
       </div>
 
-      <InterviewModal />
-      <ChaosEventModal />
+      <ModalManager />
       <FreelanceProjectDetailModal />
-      <LevelUpModal />
-      <ClientReviewModal />
-      <UnexpectedExpenseModal />
-      <PaymentModal />
 
       <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 backdrop-blur border border-zinc-800 rounded-full opacity-50 pointer-events-none animate-in fade-in duration-1000">
          <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>

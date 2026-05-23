@@ -55,11 +55,42 @@ export const ChaosEventModal = () => {
                 
                 {/* DEV HINT: Menampilkan efek dari setiap pilihan */}
                 <div className="flex gap-1">
-                    {Object.entries(opt.effect || {}).map(([key, val]) => (
-                        <span key={key} className="text-[7px] font-black bg-zinc-900 text-zinc-500 px-1 py-0.5 rounded uppercase border border-zinc-800">
-                            {key}:{val > 0 ? "+" : ""}{val}
-                        </span>
-                    ))}
+                    {Object.entries(opt.effect || {}).map(([key, val]) => {
+                          let label = key;
+                          let valueStr = (val > 0 ? '+' : '') + val;
+                          let color = 'text-zinc-500';
+
+                          if (key === 'focus') label = t('common.focus');
+                          if (key === 'energy') label = t('common.energy');
+                          if (key === 'reputation') label = t('common.reputation');
+                          if (key === 'money' || key === 'reward') {
+                             label = t('common.capital');
+                             color = val > 0 ? 'text-emerald-500' : 'text-red-500';
+                          }
+                          if (key === 'progress') label = t('common.progress');
+                          
+                          if (key === 'addCondition') {
+                             label = '+ ' + t('condition.' + val);
+                             valueStr = '';
+                             color = 'text-orange-500';
+                          }
+                          if (key === 'removeCondition') {
+                             label = '- ' + t('condition.' + val);
+                             valueStr = '';
+                             color = 'text-emerald-500';
+                          }
+                          if (key === 'activeContract' && val === null) {
+                             label = t('freelance.projectFailed');
+                             valueStr = '';
+                             color = 'text-red-600';
+                          }
+
+                          return (
+                              <span key={key} className={'text-[7px] font-black bg-zinc-900 px-1.5 py-0.5 rounded uppercase border border-zinc-800 ' + color}>
+                                  {label}{valueStr ? ':' + valueStr : ''}
+                              </span>
+                          );
+                      })}
                     <span className="text-zinc-800 text-[8px] font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter ml-2">{t('common.select')}</span>
                 </div>
               </button>
